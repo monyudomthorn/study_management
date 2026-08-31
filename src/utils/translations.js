@@ -1,0 +1,419 @@
+/**
+ * Bilingual Translation Dictionary: English & Khmer (ភាសាខ្មែរ)
+ */
+
+export const translations = {
+  en: {
+    // App branding & header
+    appTitle: "StudyTrack",
+    appSubtitle: "University & Self-Study Management System",
+    welcomeBack: "Welcome back!",
+    studentName: "Vibol Sok",
+    studentRole: "Computer Science Student",
+    university: "SETEC Institute",
+    searchPlaceholder: "Search subjects, teachers, assignments...",
+    resetData: "Reset Demo Data",
+    resetDataConfirm: "Are you sure you want to reset all data back to the default sample dataset? Any unsaved changes will be lost.",
+    dataResetSuccess: "Data reset to default successfully!",
+    allRightsReserved: "All rights reserved.",
+
+    // Navigation
+    navDashboard: "Dashboard",
+    navSubjects: "Subjects",
+    navTeachers: "Teachers",
+    navPractice: "Practice",
+    navAssignments: "Assignments",
+
+    // Stat Cards
+    statTotalSubjects: "Total Subjects",
+    statTotalTeachers: "Total Teachers",
+    statPracticeTasks: "Practice Tasks",
+    statAssignments: "Assignments",
+    activeCourses: "active courses enrolled",
+    mentorsAndProfessors: "instructors & mentors",
+    completedPractices: "completed so far",
+    pendingSubmissions: "pending or in progress",
+
+    // Study Progress
+    overallStudyProgress: "Overall Study Progress",
+    progressCalculatedDesc: "Dynamically calculated from all your enrolled subjects, practice exercises, and project assignments.",
+    completedRate: "Completed",
+    subjectBreakdown: "Subject Progress Breakdown",
+    completionOverview: "Completion Overview",
+
+    // Recent Assignments Section
+    recentAssignments: "Recent Assignments",
+    viewAllAssignments: "View All Assignments",
+    noRecentAssignments: "No assignments found. Click 'Input Assignment' to create one!",
+
+    // Common Table & Card Headers
+    colAssignment: "Assignment",
+    colSubject: "Subject",
+    colDueDate: "Due Date",
+    colPriority: "Priority",
+    colStatus: "Status",
+    colAction: "Action",
+    colTeacher: "Teacher",
+    colCode: "Code",
+    colProgress: "Progress",
+    colTitle: "Title",
+    colCreatedDate: "Created Date",
+    colTelegram: "Telegram",
+    colDescription: "Description",
+
+    // Actions & Buttons
+    inputSubject: "Input Subject",
+    inputTeacher: "Input Teacher",
+    addPractice: "Add Practice",
+    inputAssignment: "Input Assignment",
+    update: "Update",
+    edit: "Edit",
+    delete: "Delete",
+    save: "Save Changes",
+    create: "Create Now",
+    cancel: "Cancel",
+    confirmDelete: "Delete Item",
+    markComplete: "Mark Complete",
+    markInProgress: "Mark In Progress",
+    markPending: "Mark Pending",
+    filter: "Filter",
+    all: "All",
+    search: "Search",
+
+    // Filter labels
+    filterByStatus: "Filter by Status",
+    filterByPriority: "Filter by Priority",
+    filterBySubject: "Filter by Subject",
+    filterByTeacher: "Filter by Teacher",
+    allSubjects: "All Subjects",
+    allTeachers: "All Teachers",
+    allStatuses: "All Statuses",
+    allPriorities: "All Priorities",
+
+    // Status Values
+    statusNotStarted: "Not Started",
+    statusInProgress: "In Progress",
+    statusCompleted: "Completed",
+    statusPending: "Pending",
+
+    // Priority Values
+    priorityLow: "Low",
+    priorityMedium: "Medium",
+    priorityHigh: "High",
+
+    // Subjects Page
+    subjectsHeading: "Subject Management",
+    subjectsSubheading: "Track your course syllabus, academic credit codes, assigned lecturers, and syllabus milestones.",
+    searchSubjectsPlaceholder: "Search subjects by name or code...",
+    noSubjectsFound: "No subjects match your search or filter criteria.",
+    selectTeacherPrompt: "-- Select or type teacher name --",
+    selectSubjectPrompt: "-- Select or type subject name --",
+    modalAddSubject: "Add New Subject",
+    modalEditSubject: "Update Subject",
+    fieldName: "Subject Name",
+    fieldCode: "Subject Code",
+    fieldTeacher: "Assigned Teacher",
+    fieldProgress: "Progress Percentage",
+    fieldDescription: "Description / Course Notes",
+    fieldStatus: "Current Status",
+
+    // Teachers Page
+    teachersHeading: "Teacher Directory",
+    teachersSubheading: "Manage your university professors, academic mentors, and Telegram contact information for study guidance.",
+    searchTeachersPlaceholder: "Search teachers by name, subject, or telegram...",
+    noTeachersFound: "No teachers match your search criteria.",
+    modalAddTeacher: "Add New Teacher",
+    modalEditTeacher: "Update Teacher Information",
+    fieldTeacherName: "Teacher Name",
+    fieldSpecialty: "Subject / Department",
+    fieldTelegram: "Telegram Username",
+    fieldTeacherBio: "Teacher Background / Office Hours",
+    openTelegram: "Message on Telegram",
+
+    // Practice Page
+    practiceHeading: "Practice Management",
+    practiceSubheading: "Record hands-on exercises, homework code challenges, laboratory tasks, and revision drills.",
+    searchPracticePlaceholder: "Search practices by title, subject, or notes...",
+    noPracticesFound: "No practice exercises match your search criteria.",
+    modalAddPractice: "Add Practice Exercise",
+    modalEditPractice: "Update Practice Exercise",
+    fieldPracticeTitle: "Practice Title",
+    fieldPracticeDate: "Created Date",
+
+    // Assignments Page
+    assignmentsHeading: "Assignment Management",
+    assignmentsSubheading: "Stay ahead of project deadlines, research papers, midterm submissions, and priority deliverables.",
+    searchAssignmentsPlaceholder: "Search assignments by title, subject...",
+    noAssignmentsFound: "No assignments match your search or filter criteria.",
+    modalAddAssignment: "Input Assignment",
+    modalEditAssignment: "Update Assignment",
+    fieldAssignmentTitle: "Assignment Title",
+    fieldDueDate: "Due Date",
+    fieldPriority: "Priority Level",
+
+    // Modals & Confirmations
+    confirmDeleteTitle: "Confirm Deletion",
+    confirmDeleteMessage: "Are you sure you want to delete this item? This action cannot be undone.",
+    itemDeletedSuccess: "Item deleted successfully!",
+
+    // Validation & Notifications
+    errorRequiredFields: "Please fill in all required fields.",
+    subjectAddedSuccess: "Subject added successfully!",
+    subjectUpdatedSuccess: "Subject updated successfully!",
+    teacherAddedSuccess: "Teacher added successfully!",
+    teacherUpdatedSuccess: "Teacher updated successfully!",
+    practiceAddedSuccess: "Practice exercise added successfully!",
+    practiceUpdatedSuccess: "Practice exercise updated successfully!",
+    assignmentAddedSuccess: "Assignment added successfully!",
+    assignmentUpdatedSuccess: "Assignment updated successfully!",
+    statusUpdatedSuccess: "Status updated successfully!",
+
+    // Placeholders
+    placeholderSubName: "e.g. Web Development II",
+    placeholderSubCode: "e.g. WD II",
+    placeholderTeacherName: "e.g. ROM",
+    placeholderTelegram: "e.g. @setec",
+    placeholderPracticeTitle: "e.g. Web Front-End Practice",
+    placeholderAssignmentTitle: "e.g. Web Front-End Assignment",
+    placeholderDesc: "Provide concise instructions, requirements, or study notes...",
+
+    // First Login & User Profile Management
+    firstLoginTitle: "Welcome to SETEC StudyTrack!",
+    firstLoginSubtitle: "Please set up your student profile for first-time login to personalize your dashboard.",
+    editProfileTitle: "Update Student Profile",
+    editProfileSubtitle: "Manage and modify your personal student credentials and information.",
+    fieldStudentFullName: "Student Full Name",
+    fieldStudentRole: "Major / Department",
+    fieldStudentUniversity: "University / Institute",
+    fieldStudentID: "Student ID Number",
+    fieldStudentYear: "Academic Year / Semester",
+    fieldStudentTelegram: "Telegram Username",
+    btnStartStudying: "Enter Dashboard",
+    btnUpdateProfile: "Save Changes",
+    btnQuickDemo: "Fill Demo Data",
+    btnLogoutUser: "Log Out Account",
+    logoutConfirm: "Are you sure you want to log out of your student account?",
+    profileCreatedSuccess: "Student profile created successfully! Welcome to StudyTrack.",
+    profileUpdatedSuccess: "Student profile updated successfully!",
+    profileResetSuccess: "User account logged out successfully. Please log in again.",
+    placeholderStudentName: "e.g. Sok Vibol",
+    placeholderRole: "e.g. Computer Science",
+    placeholderUniversity: "e.g. SETEC Institute",
+    placeholderStudentID: "e.g. SET-2026-8899",
+    placeholderYear: "e.g. Year 3, Semester 2",
+    setecStudentLabel: "SETEC Student",
+
+    // Quick Stats Widget
+    daysLeft: "days left",
+    overdue: "Overdue",
+    dueToday: "Due Today",
+    dueSoon: "Due Soon"
+  },
+
+  kh: {
+    // App branding & header
+    appTitle: "StudyTrack",
+    appSubtitle: "ប្រព័ន្ធគ្រប់គ្រង និងតាមដានការសិក្សាថ្នាក់សាកលវិទ្យាល័យ",
+    welcomeBack: "សូមស្វាគមន៍ការត្រឡប់មកវិញ!",
+    studentName: "សុខ វិបុល",
+    studentRole: "និស្សិតវិទ្យាសាស្ត្រកុំព្យូទ័រ",
+    university: "វិទ្យាស្ថាន ស៊ីតិក (SETEC)",
+    searchPlaceholder: "ស្វែងរកមុខវិជ្ជា សាស្ត្រាចារ្យ កិច្ចការ...",
+    resetData: "កំណត់ទិន្នន័យគំរូឡើងវិញ",
+    resetDataConfirm: "តើអ្នកប្រាកដជាចង់កំណត់ទិន្នន័យទាំងអស់ត្រឡប់ទៅជាទិន្នន័យគំរូដើមវិញដែរឬទេ? រាល់ការកែប្រែនឹងត្រូវបាត់បង់។",
+    dataResetSuccess: "បានកំណត់ទិន្នន័យដើមឡើងវិញដោយជោគជ័យ!",
+    allRightsReserved: "រក្សាសិទ្ធិគ្រប់យ៉ាង។",
+
+    // Navigation
+    navDashboard: "ផ្ទាំងព័ត៌មាន (Dashboard)",
+    navSubjects: "មុខវិជ្ជាសិក្សា",
+    navTeachers: "សាស្ត្រាចារ្យ / គ្រូបង្រៀន",
+    navPractice: "លំហាត់អនុវត្ត",
+    navAssignments: "កិច្ចការស្រាវជ្រាវ (Assignments)",
+
+    // Stat Cards
+    statTotalSubjects: "មុខវិជ្ជាសរុប",
+    statTotalTeachers: "សាស្ត្រាចារ្យសរុប",
+    statPracticeTasks: "លំហាត់អនុវត្តសរុប",
+    statAssignments: "កិច្ចការសរុប",
+    activeCourses: "មុខវិជ្ជាកំពុងរៀន",
+    mentorsAndProfessors: "សាស្ត្រាចារ្យ និងអ្នកណែនាំ",
+    completedPractices: "បានអនុវត្តរួចរាល់",
+    pendingSubmissions: "កំពុងដំណើរការ / រង់ចាំ",
+
+    // Study Progress
+    overallStudyProgress: "វឌ្ឍនភាពនៃការសិក្សាសរុប",
+    progressCalculatedDesc: "គណនាដោយស្វ័យប្រវត្តិចេញពីមុខវិជ្ជា លំហាត់អនុវត្តន៍ និងកិច្ចការស្រាវជ្រាវទាំងអស់របស់អ្នក។",
+    completedRate: "បានបញ្ចប់",
+    subjectBreakdown: "វឌ្ឍនភាពតាមមុខវិជ្ជានីមួយៗ",
+    completionOverview: "ទិដ្ឋភាពទូទៅនៃការបញ្ចប់",
+
+    // Recent Assignments Section
+    recentAssignments: "កិច្ចការថ្មីៗ (Recent Assignments)",
+    viewAllAssignments: "មើលកិច្ចការទាំងអស់",
+    noRecentAssignments: "មិនទាន់មានកិច្ចការនៅឡើយទេ។ សូមចុច 'បញ្ចូលកិច្ចការ' ដើម្បីបង្កើត!",
+
+    // Common Table & Card Headers
+    colAssignment: "កិច្ចការ",
+    colSubject: "មុខវិជ្ជា",
+    colDueDate: "កាលបរិច្ឆេទកំណត់",
+    colPriority: "កម្រិតអាទិភាព",
+    colStatus: "ស្ថានភាព",
+    colAction: "សកម្មភាព",
+    colTeacher: "សាស្ត្រាចារ្យ",
+    colCode: "កូដមុខវិជ្ជា",
+    colProgress: "វឌ្ឍនភាព",
+    colTitle: "ចំណងជើង",
+    colCreatedDate: "កាលបរិច្ឆេទបង្កើត",
+    colTelegram: "តេឡេក្រាម (Telegram)",
+    colDescription: "ការពិពណ៌នា",
+
+    // Actions & Buttons
+    inputSubject: "បញ្ចូលមុខវិជ្ជា",
+    inputTeacher: "បញ្ចូលសាស្ត្រាចារ្យ",
+    addPractice: "បន្ថែមលំហាត់",
+    inputAssignment: "បញ្ចូលកិច្ចការ",
+    update: "កែប្រែ",
+    edit: "កែសម្រួល",
+    delete: "លុបចេញ",
+    save: "រក្សាទុកការផ្លាស់ប្តូរ",
+    create: "បង្កើតឥឡូវនេះ",
+    cancel: "បោះបង់",
+    confirmDelete: "យល់ព្រមលុប",
+    markComplete: "កំណត់ថាបានបញ្ចប់",
+    markInProgress: "កំណត់ថាកំពុងធ្វើ",
+    markPending: "កំណត់ថារង់ចាំ",
+    filter: "ចម្រាញ់រក",
+    all: "ទាំងអស់",
+    search: "ស្វែងរក",
+
+    // Filter labels
+    filterByStatus: "ចម្រាញ់តាមស្ថានភាព",
+    filterByPriority: "ចម្រាញ់តាមកម្រិតអាទិភាព",
+    filterBySubject: "ចម្រាញ់តាមមុខវិជ្ជា",
+    filterByTeacher: "ចម្រាញ់តាមសាស្ត្រាចារ្យ",
+    allSubjects: "គ្រប់មុខវិជ្ជា",
+    allTeachers: "គ្រប់សាស្ត្រាចារ្យ",
+    allStatuses: "គ្រប់ស្ថានភាព",
+    allPriorities: "គ្រប់កម្រិតអាទិភាព",
+
+    // Status Values
+    statusNotStarted: "មិនទាន់ចាប់ផ្ដើម",
+    statusInProgress: "កំពុងដំណើរការ",
+    statusCompleted: "បានបញ្ចប់",
+    statusPending: "រង់ចាំដំណើរការ",
+
+    // Priority Values
+    priorityLow: "ទាប",
+    priorityMedium: "មធ្យម",
+    priorityHigh: "ខ្ពស់",
+
+    // Subjects Page
+    subjectsHeading: "ការគ្រប់គ្រងមុខវិជ្ជាសិក្សា",
+    subjectsSubheading: "តាមដានកូដមុខវិជ្ជា សាស្ត្រាចារ្យទទួលបន្ទុក និងវឌ្ឍនភាពនៃការសិក្សារបស់អ្នក។",
+    searchSubjectsPlaceholder: "ស្វែងរកមុខវិជ្ជាតាមឈ្មោះ ឬកូដមុខវិជ្ជា...",
+    noSubjectsFound: "រកមិនឃើញមុខវិជ្ជាដែលត្រូវនឹងលក្ខខណ្ឌស្វែងរកឡើយ។",
+    selectTeacherPrompt: "-- ជ្រើសរើស ឬវាយបញ្ចូលឈ្មោះសាស្ត្រាចារ្យ --",
+    selectSubjectPrompt: "-- ជ្រើសរើស ឬវាយបញ្ចូលឈ្មោះមុខវិជ្ជា --",
+    modalAddSubject: "បញ្ចូលមុខវិជ្ជាថ្មី",
+    modalEditSubject: "កែប្រែព័ត៌មានមុខវិជ្ជា",
+    fieldName: "ឈ្មោះមុខវិជ្ជា",
+    fieldCode: "កូដមុខវិជ្ជា",
+    fieldTeacher: "សាស្ត្រាចារ្យទទួលបន្ទុក",
+    fieldProgress: "ភាគរយវឌ្ឍនភាព",
+    fieldDescription: "ការពិពណ៌នា / កំណត់សម្គាល់មុខវិជ្ជា",
+    fieldStatus: "ស្ថានភាពបច្ចុប្បន្ន",
+
+    // Teachers Page
+    teachersHeading: "បញ្ជីឈ្មោះសាស្ត្រាចារ្យ",
+    teachersSubheading: "គ្រប់គ្រងព័ត៌មានទំនាក់ទំនង Telegram របស់សាស្ត្រាចារ្យ និងអ្នកណែនាំសម្រាប់ការសិក្សា។",
+    searchTeachersPlaceholder: "ស្វែងរកតាមឈ្មោះ មុខវិជ្ជា ឬ Telegram...",
+    noTeachersFound: "រកមិនឃើញសាស្ត្រាចារ្យដែលត្រូវនឹងលក្ខខណ្ឌស្វែងរកឡើយ។",
+    modalAddTeacher: "បញ្ចូលសាស្ត្រាចារ្យថ្មី",
+    modalEditTeacher: "កែប្រែព័ត៌មានសាស្ត្រាចារ្យ",
+    fieldTeacherName: "ឈ្មោះសាស្ត្រាចារ្យ",
+    fieldSpecialty: "មុខវិជ្ជា / ដេប៉ាតឺម៉ង់",
+    fieldTelegram: "ឈ្មោះគណនី Telegram",
+    fieldTeacherBio: "ប្រវត្តិរូបសង្ខេប / ម៉ោងពិគ្រោះយោបល់",
+    openTelegram: "ផ្ញើសារតាម Telegram",
+
+    // Practice Page
+    practiceHeading: "ការគ្រប់គ្រងលំហាត់អនុវត្ត",
+    practiceSubheading: "កត់ត្រាលំហាត់កូដ កិច្ចការពិសោធន៍ និងលំហាត់ពង្រឹងសមត្ថភាពប្រចាំថ្ងៃ។",
+    searchPracticePlaceholder: "ស្វែងរកលំហាត់អនុវត្តតាមចំណងជើង...",
+    noPracticesFound: "រកមិនឃើញលំហាត់អនុវត្តដែលត្រូវនឹងលក្ខខណ្ឌស្វែងរកឡើយ។",
+    modalAddPractice: "បន្ថែមលំហាត់អនុវត្តថ្មី",
+    modalEditPractice: "កែប្រែលំហាត់អនុវត្ត",
+    fieldPracticeTitle: "ចំណងជើងលំហាត់",
+    fieldPracticeDate: "កាលបរិច្ឆេទបង្កើត",
+
+    // Assignments Page
+    assignmentsHeading: "ការគ្រប់គ្រងកិច្ចការស្រាវជ្រាវ (Assignments)",
+    assignmentsSubheading: "គ្រប់គ្រងកាលបរិច្ឆេទផុតកំណត់ កម្រិតអាទិភាព និងការប្រគល់កិច្ចការឱ្យទាន់ពេលវេលា។",
+    searchAssignmentsPlaceholder: "ស្វែងរកកិច្ចការតាមចំណងជើង មុខវិជ្ជា...",
+    noAssignmentsFound: "រកមិនឃើញកិច្ចការដែលត្រូវនឹងលក្ខខណ្ឌស្វែងរកឡើយ។",
+    modalAddAssignment: "បញ្ចូលកិច្ចការថ្មី",
+    modalEditAssignment: "កែប្រែកិច្ចការ",
+    fieldAssignmentTitle: "ចំណងជើងកិច្ចការ",
+    fieldDueDate: "កាលបរិច្ឆេទកំណត់ប្រគល់",
+    fieldPriority: "កម្រិតអាទិភាព",
+
+    // Modals & Confirmations
+    confirmDeleteTitle: "បញ្ជាក់ការលុបទិន្នន័យ",
+    confirmDeleteMessage: "តើអ្នកប្រាកដជាចង់លុបទិន្នន័យនេះមែនទេ? សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។",
+    itemDeletedSuccess: "ទិន្នន័យត្រូវបានលុបដោយជោគជ័យ!",
+
+    // Validation & Notifications
+    errorRequiredFields: "សូមបំពេញគ្រប់ព័ត៌មានដែលចាំបាច់។",
+    subjectAddedSuccess: "បានបញ្ចូលមុខវិជ្ជាដោយជោគជ័យ!",
+    subjectUpdatedSuccess: "បានកែប្រែមុខវិជ្ជាដោយជោគជ័យ!",
+    teacherAddedSuccess: "បានបញ្ចូលសាស្ត្រាចារ្យដោយជោគជ័យ!",
+    teacherUpdatedSuccess: "បានកែប្រែព័ត៌មានសាស្ត្រាចារ្យដោយជោគជ័យ!",
+    practiceAddedSuccess: "បានបន្ថែមលំហាត់អនុវត្តដោយជោគជ័យ!",
+    practiceUpdatedSuccess: "បានកែប្រែលំហាត់អនុវត្តដោយជោគជ័យ!",
+    assignmentAddedSuccess: "បានបញ្ចូលកិច្ចការដោយជោគជ័យ!",
+    assignmentUpdatedSuccess: "បានកែប្រែកិច្ចការដោយជោគជ័យ!",
+    statusUpdatedSuccess: "បានកែប្រែស្ថានភាពដោយជោគជ័យ!",
+
+    // Placeholders
+    placeholderSubName: "ឧ. ការអភិវឌ្ឍកម្មវិធីទូរស័ព្ទ (Mobile App)",
+    placeholderSubCode: "ឧ. MOB204",
+    placeholderTeacherName: "ឧ. លោកគ្រូ ដារ៉ា",
+    placeholderTelegram: "ឧ. @dara_setec ឬ dara_setec",
+    placeholderPracticeTitle: "ឧ. អនុវត្ត React Redux Toolkit",
+    placeholderAssignmentTitle: "ឧ. គម្រោងស្រាវជ្រាវបញ្ចប់វគ្គ",
+    placeholderDesc: "បញ្ជាក់ការណែនាំ តម្រូវការ ឬកំណត់សម្គាល់ការសិក្សា...",
+
+    // First Login & User Profile Management
+    firstLoginTitle: "សូមស្វាគមន៍មកកាន់ SETEC StudyTrack!",
+    firstLoginSubtitle: "សូមបំពេញព័ត៌មាននិស្សិតរបស់អ្នកសម្រាប់ការចូលប្រើប្រាស់លើកដំបូង ដើម្បីរៀបចំផ្ទាំងគ្រប់គ្រងផ្ទាល់ខ្លួន។",
+    editProfileTitle: "កែសម្រួលព័ត៌មាននិស្សិត",
+    editProfileSubtitle: "គ្រប់គ្រង និងកែសម្រួលព័ត៌មានផ្ទាល់ខ្លួនរបស់និស្សិត។",
+    fieldStudentFullName: "ឈ្មោះពេញរបស់និស្សិត",
+    fieldStudentRole: "មុខជំនាញសិក្សា",
+    fieldStudentUniversity: "សាកលវិទ្យាល័យ / វិទ្យាស្ថាន",
+    fieldStudentID: "អត្តលេខនិស្សិត",
+    fieldStudentYear: "ឆ្នាំសិក្សា / ឆមាស",
+    fieldStudentTelegram: "គណនី Telegram",
+    btnStartStudying: "ចូលទៅកាន់ផ្ទាំងគ្រប់គ្រង",
+    btnUpdateProfile: "រក្សាទុកការផ្លាស់ប្តូរ",
+    btnQuickDemo: "បំពេញទិន្នន័យគំរូ",
+    btnLogoutUser: "ចាកចេញពីគណនី",
+    logoutConfirm: "តើអ្នកពិតជាចង់ចាកចេញពីគណនីនិស្សិតនេះមែនទេ?",
+    profileCreatedSuccess: "បានបង្កើតព័ត៌មានគណនីនិស្សិតដោយជោគជ័យ! សូមស្វាគមន៍មកកាន់ StudyTrack។",
+    profileUpdatedSuccess: "បានកែសម្រួលព័ត៌មានគណនីនិស្សិតដោយជោគជ័យ!",
+    profileResetSuccess: "បានចាកចេញពីគណនីដោយជោគជ័យ។ សូមចូលប្រើប្រាស់ម្ដងទៀត។",
+    placeholderStudentName: "ឧ. សុខ វិបុល",
+    placeholderRole: "ឧ. វិទ្យាសាស្ត្រកុំព្យូទ័រ",
+    placeholderUniversity: "ឧ. វិទ្យាស្ថាន សេតិច (SETEC)",
+    placeholderStudentID: "ឧ. SET-2026-8899",
+    placeholderYear: "ឧ. ឆ្នាំទី ៣, ឆមាសទី ២",
+    setecStudentLabel: "និស្សិតសេតិច",
+
+    // Quick Stats Widget
+    daysLeft: "ថ្ងៃនៅសល់",
+    overdue: "ហួសកំណត់",
+    dueToday: "កំណត់ថ្ងៃនេះ",
+    dueSoon: "ជិតដល់កំណត់"
+  }
+};
