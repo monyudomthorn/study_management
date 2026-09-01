@@ -3,13 +3,13 @@ import { loadFromStorage, saveToStorage, removeFromStorage, STORAGE_KEYS } from 
 import { api } from '../services/api';
 
 const DEFAULT_USER_PROFILE = {
-  name: "Monyudom Thorn",
+  name: "SX8 Student",
   role: "MIS Student",
   university: "SETEC Institute",
   studentId: "M2425-0384",
-  telegram: "@monyudomthorn",
+  telegram: "@setec_sx8",
   year: "Year 2, Semester 1",
-  avatarText: "MT",
+  avatarText: "SX",
   email: "sx8@setec.edu.kh"
 };
 
@@ -59,12 +59,12 @@ export const AuthProvider = ({ children }) => {
           id: u.id,
           name: u.name,
           email: u.email,
-          role: u.role || 'Computer Science Student',
+          role: u.role || 'MIS Student',
           university: u.university || 'SETEC Institute',
-          studentId: u.student_id || u.studentId || 'SET-2026-8899',
+          studentId: u.student_id || u.studentId || 'M2425-0384',
           telegram: u.telegram || '',
-          year: u.year || 'Year 3, Semester 2',
-          avatarText: u.avatar_text || u.avatarText || 'ST'
+          year: u.year || 'Year 2, Semester 1',
+          avatarText: u.avatar_text || u.avatarText || 'SX'
         };
 
         setCurrentUser(normalizedUser);
@@ -73,14 +73,13 @@ export const AuthProvider = ({ children }) => {
       }
       throw new Error(res?.message || 'Login failed');
     } catch (error) {
-      // Fallback for offline / demo mode
+      // Fallback for demo login if offline/local
       if (
-        (loginIdentifier === 'monyudom@setec.edu.kh' || loginIdentifier === 'SET-2026-8899' || loginIdentifier === 'admin') &&
-        (password === 'password123' || password === '123456' || password === 'admin')
+        (loginIdentifier === 'sx8@setec.edu.kh' || loginIdentifier === 'monyudom@setec.edu.kh') &&
+        (password === 'password123' || password === '123456')
       ) {
-        setCurrentUser(DEFAULT_USER_PROFILE);
-        setToken('demo-token-active');
-        return { success: true, user: DEFAULT_USER_PROFILE, message: 'Logged in as Demo Student.' };
+        const demoUser = loadDemoUser();
+        return { success: true, user: demoUser, message: 'Logged in as Demo Student!' };
       }
       throw error;
     } finally {
@@ -99,12 +98,12 @@ export const AuthProvider = ({ children }) => {
           id: u.id,
           name: u.name,
           email: u.email,
-          role: u.role || 'Computer Science Student',
+          role: u.role || 'MIS Student',
           university: u.university || 'SETEC Institute',
-          studentId: u.student_id || u.studentId || userData.studentId || 'SET-2026-8899',
+          studentId: u.student_id || u.studentId || userData.studentId || 'M2425-0384',
           telegram: u.telegram || userData.telegram || '',
-          year: u.year || userData.year || 'Year 3, Semester 2',
-          avatarText: u.avatar_text || u.avatarText || 'ST'
+          year: u.year || userData.year || 'Year 2, Semester 1',
+          avatarText: u.avatar_text || u.avatarText || 'SX'
         };
 
         setCurrentUser(normalizedUser);
@@ -119,49 +118,46 @@ export const AuthProvider = ({ children }) => {
         ? (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase()
         : (nameParts[0] ? nameParts[0].slice(0, 2).toUpperCase() : 'ST');
 
-      const fallbackUser = {
-        id: `usr-${Date.now()}`,
+      const localNewUser = {
+        id: Date.now(),
         name: userData.name,
         email: userData.email,
-        role: userData.role || 'Computer Science Student',
+        role: userData.role || 'MIS Student',
         university: userData.university || 'SETEC Institute',
         studentId: userData.studentId || `SET-${Date.now().toString().slice(-4)}`,
         telegram: userData.telegram || '',
-        year: userData.year || 'Year 3, Semester 2',
+        year: userData.year || 'Year 2, Semester 1',
         avatarText: avatar
       };
-
-      setCurrentUser(fallbackUser);
-      setToken('offline-token');
-      return { success: true, user: fallbackUser, message: 'Account created locally!' };
+      setCurrentUser(localNewUser);
+      setToken(`token-${Date.now()}`);
+      return { success: true, user: localNewUser, message: 'Registration saved!' };
     } finally {
       setIsLoadingUser(false);
     }
   };
 
-  // 3. Forgot Password (Request Code)
+  // 3. Forgot Password
   const forgotPassword = async (emailOrStudentId) => {
     try {
-      const res = await api.forgotPassword(emailOrStudentId);
-      return res;
+      return await api.forgotPassword(emailOrStudentId);
     } catch (error) {
-      // Fallback code generation for demo / offline
+      // Offline fallback: generate mock 6-digit code
+      const mockCode = Math.floor(100000 + Math.random() * 900000).toString();
       return {
         success: true,
-        message: 'A 6-digit verification code has been generated.',
-        reset_code: '123456',
-        email: emailOrStudentId
+        reset_code: mockCode,
+        message: 'Verification code generated for testing.'
       };
     }
   };
 
-  // 4. Reset Password (Submit new password with code)
+  // 4. Reset Password
   const resetPassword = async (payload) => {
     try {
-      const res = await api.resetPassword(payload);
-      return res;
+      return await api.resetPassword(payload);
     } catch (error) {
-      if (payload.code === '123456') {
+      if (payload.code === '123456' || payload.code) {
         return { success: true, message: 'Password reset successfully!' };
       }
       throw error;
@@ -196,7 +192,7 @@ export const AuthProvider = ({ children }) => {
         .map((n) => n[0])
         .join('')
         .toUpperCase()
-      : currentUser?.avatarText || 'MT';
+      : currentUser?.avatarText || 'SX';
 
     const updated = {
       ...currentUser,
@@ -213,7 +209,7 @@ export const AuthProvider = ({ children }) => {
         name: updated.name,
         role: updated.role,
         university: updated.university,
-        student_id: updated.studentId || updated.student_id,
+        student_id: updated.studentId,
         telegram: updated.telegram,
         year: updated.year,
         avatar_text: updated.avatarText,

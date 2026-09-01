@@ -115,7 +115,7 @@ CREATE TABLE `assignments` (
 -- Insert Default User (Password: password123)
 INSERT INTO `users` (`id`, `name`, `email`, `role`, `university`, `student_id`, `telegram`, `year`, `avatar_text`, `password`, `created_at`, `updated_at`)
 VALUES
-(1, 'Monyudom Thorn', 'monyudom@setec.edu.kh', 'Computer Science Student', 'SETEC Institute', 'SET-2026-8899', '@monyudomthorn', 'Year 3, Semester 2', 'MT', '$2y$12$eA1Hq5kUuIqKjY2YF3Gj..Z9bK9s6sDq7V4wZ0b.EomwR2nQe/z5K', NOW(), NOW());
+(1, 'SX8 Student', 'sx8@setec.edu.kh', 'MIS Student', 'SETEC Institute', 'M2425-0384', '@setec_sx8', 'Year 2, Semester 1', 'SX', '$2y$12$eA1Hq5kUuIqKjY2YF3Gj..Z9bK9s6sDq7V4wZ0b.EomwR2nQe/z5K', NOW(), NOW());
 
 -- Insert Teachers
 INSERT INTO `teachers` (`id`, `name`, `subject`, `telegram`, `description`, `created_at`, `updated_at`)

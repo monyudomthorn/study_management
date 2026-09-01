@@ -44,11 +44,11 @@ class AuthController extends Controller
             'name' => trim($validated['name']),
             'email' => strtolower(trim($validated['email'])),
             'password' => Hash::make($validated['password']),
-            'role' => $validated['role'] ?? 'Computer Science Student',
+            'role' => $validated['role'] ?? 'MIS Student',
             'university' => $validated['university'] ?? 'SETEC Institute',
             'student_id' => $studentId,
             'telegram' => $telegram,
-            'year' => $validated['year'] ?? 'Year 3, Semester 2',
+            'year' => $validated['year'] ?? 'Year 2, Semester 1',
             'avatar_text' => $avatar,
             'remember_token' => Str::random(60),
         ]);
@@ -77,19 +77,28 @@ class AuthController extends Controller
             ->first();
 
         // If no user exists yet in database, create the default demo user if logging in with demo credentials
-        if (!$user && in_array($login, ['sx8@setec.edu.kh', 'M2425-SX8'])) {
+        if (!$user && in_array($login, ['sx8@setec.edu.kh', 'monyudom@setec.edu.kh', 'M2425-0384', 'SET-2026-8899'])) {
             $user = User::create([
                 'name' => 'SX8 Student',
                 'email' => 'sx8@setec.edu.kh',
                 'password' => Hash::make('password123'),
                 'role' => 'MIS Student',
                 'university' => 'SETEC Institute',
-                'student_id' => 'M2425-SX8',
+                'student_id' => 'M2425-0384',
                 'telegram' => '@setec_sx8',
                 'year' => 'Year 2, Semester 1',
                 'avatar_text' => 'SX',
                 'remember_token' => Str::random(60),
             ]);
+        }
+
+        // If demo user exists, update name to SX8 Student
+        if ($user && in_array($user->email, ['sx8@setec.edu.kh', 'monyudom@setec.edu.kh'])) {
+            $user->name = 'SX8 Student';
+            $user->avatar_text = 'SX';
+            $user->role = 'MIS Student';
+            $user->year = 'Year 2, Semester 1';
+            $user->save();
         }
 
         if (!$user) {
