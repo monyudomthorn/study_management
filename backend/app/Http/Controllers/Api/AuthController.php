@@ -77,17 +77,17 @@ class AuthController extends Controller
             ->first();
 
         // If no user exists yet in database, create the default demo user if logging in with demo credentials
-        if (!$user && ($login === 'monyudom@setec.edu.kh' || $login === 'SET-2026-8899')) {
+        if (!$user && in_array($login, ['sx8@setec.edu.kh', 'M2425-SX8'])) {
             $user = User::create([
-                'name' => 'Monyudom Thorn',
-                'email' => 'monyudom@setec.edu.kh',
+                'name' => 'SX8 Student',
+                'email' => 'sx8@setec.edu.kh',
                 'password' => Hash::make('password123'),
-                'role' => 'Computer Science Student',
+                'role' => 'MIS Student',
                 'university' => 'SETEC Institute',
-                'student_id' => 'SET-2026-8899',
-                'telegram' => '@monyudomthorn',
-                'year' => 'Year 3, Semester 2',
-                'avatar_text' => 'MT',
+                'student_id' => 'M2425-SX8',
+                'telegram' => '@setec_sx8',
+                'year' => 'Year 2, Semester 1',
+                'avatar_text' => 'SX',
                 'remember_token' => Str::random(60),
             ]);
         }

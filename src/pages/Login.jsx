@@ -68,7 +68,7 @@ export const Login = () => {
             className="auth-logo-img"
           />
           <h1 className="auth-title">Welcome Back</h1>
-          <p className="auth-subtitle">SETEC Study Management & Tracking Portal</p>
+          <p className="auth-subtitle">SETEC SX8 Study Management</p>
         </div>
 
         {/* Login Form */}
@@ -133,7 +133,7 @@ export const Login = () => {
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
               />
-              <span className="checkbox-label">Remember my session</span>
+              <span className="checkbox-label">Remember</span>
             </label>
           </div>
 

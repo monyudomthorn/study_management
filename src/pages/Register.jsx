@@ -89,7 +89,7 @@ export const Register = () => {
             className="auth-logo-img"
           />
           <h1 className="auth-title">Create Student Account</h1>
-          <p className="auth-subtitle">Join the SETEC Study Management & Academic Tracking System</p>
+          <p className="auth-subtitle">Join the SETEC SX8 Study Management</p>
         </div>
 
         {/* Register Form */}
@@ -130,7 +130,7 @@ export const Register = () => {
                   type="email"
                   className="form-control"
                   style={{ paddingLeft: '40px' }}
-                  placeholder="e.g. yourname@setec.edu.kh"
+                  placeholder="e.g. youremail@gmail.com"
                   value={formData.email}
                   onChange={handleChange}
                   autoComplete="off"
@@ -290,7 +290,7 @@ export const Register = () => {
             disabled={isSubmitting}
             icon="ri-user-add-line"
           >
-            {isSubmitting ? 'Creating Account...' : 'Complete Registration'}
+            {isSubmitting ? 'Creating Account...' : 'Registration'}
           </Button>
         </form>
 

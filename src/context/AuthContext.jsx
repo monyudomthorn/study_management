@@ -4,13 +4,13 @@ import { api } from '../services/api';
 
 const DEFAULT_USER_PROFILE = {
   name: "Monyudom Thorn",
-  role: "Computer Science Student",
+  role: "MIS Student",
   university: "SETEC Institute",
-  studentId: "SET-2026-8899",
+  studentId: "M2425-0384",
   telegram: "@monyudomthorn",
-  year: "Year 3, Semester 2",
+  year: "Year 2, Semester 1",
   avatarText: "MT",
-  email: "monyudom@setec.edu.kh"
+  email: "sx8@setec.edu.kh"
 };
 
 const AuthContext = createContext();
