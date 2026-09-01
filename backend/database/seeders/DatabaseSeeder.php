@@ -21,11 +21,11 @@ class DatabaseSeeder extends Seeder
             ['email' => 'monyudom@setec.edu.kh'],
             [
                 'name' => 'Monyudom Thorn',
-                'role' => 'Computer Science Student',
+                'role' => 'MIS Student',
                 'university' => 'SETEC Institute',
-                'student_id' => 'SET-2026-8899',
+                'student_id' => 'M2425-0384',
                 'telegram' => '@monyudomthorn',
-                'year' => 'Year 3, Semester 2',
+                'year' => 'Year 2, Semester 1',
                 'avatar_text' => 'MT',
             ]
         );

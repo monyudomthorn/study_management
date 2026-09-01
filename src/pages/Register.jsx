@@ -15,9 +15,9 @@ export const Register = () => {
     name: '',
     email: '',
     studentId: '',
-    role: 'Computer Science Student',
+    role: 'Management Information System (MIS)',
     university: 'SETEC Institute',
-    year: 'Year 3, Semester 2',
+    year: 'Year 2, Semester 1',
     telegram: '',
     password: '',
     confirmPassword: ''
@@ -150,7 +150,7 @@ export const Register = () => {
                   type="text"
                   className="form-control"
                   style={{ paddingLeft: '40px' }}
-                  placeholder="e.g. SET-2026-8899"
+                  placeholder="e.g. M2425-0384"
                   value={formData.studentId}
                   onChange={handleChange}
                 />
@@ -169,11 +169,11 @@ export const Register = () => {
                 value={formData.role}
                 onChange={handleChange}
               >
-                <option value="Computer Science Student">Computer Science (CS)</option>
-                <option value="Management Information System">Management Information System (MIS)</option>
-                <option value="Software Engineering">Software Engineering (SE)</option>
-                <option value="Network & Cybersecurity">Network & Cybersecurity</option>
-                <option value="Design & Multimedia">Design & Multimedia</option>
+                <option value="Management Information System (MIS)">Management Information System (MIS)</option>
+                <option value="Business Information Technology (BIT)">Business Information Technology (BIT)</option>
+                <option value="Design (DS)">Design (DS)</option>
+                <option value="Computer Science (CS)">Computer Science (CS)</option>
+                <option value="Software Engineering (SE)">Software Engineering (SE)</option>
               </select>
             </div>
           </div>
@@ -215,7 +215,7 @@ export const Register = () => {
                   type="text"
                   className="form-control"
                   style={{ paddingLeft: '40px' }}
-                  placeholder="@username"
+                  placeholder="@monyudomthorn"
                   value={formData.telegram}
                   onChange={handleChange}
                 />
@@ -246,6 +246,7 @@ export const Register = () => {
                   type="button"
                   className="password-toggle-btn"
                   onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   <i className={showPassword ? 'ri-eye-off-line' : 'ri-eye-line'}></i>
                 </button>
