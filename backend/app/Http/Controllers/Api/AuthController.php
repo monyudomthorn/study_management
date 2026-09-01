@@ -12,13 +12,13 @@ use Illuminate\Support\Str;
 class AuthController extends Controller
 {
     /**
-     * Register a new student user
+     * Register a new student user (Always inserts/updates into MySQL database)
      */
     public function register(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email',
+            'email' => 'required|string|email|max:255',
             'password' => 'required|string|min:6',
             'role' => 'nullable|string|max:255',
             'university' => 'nullable|string|max:255',
@@ -28,6 +28,7 @@ class AuthController extends Controller
             'year' => 'nullable|string|max:100',
         ]);
 
+        $email = strtolower(trim($validated['email']));
         $studentId = $validated['studentId'] ?? $validated['student_id'] ?? ('SET-' . date('Y') . '-' . rand(1000, 9999));
         
         $nameParts = explode(' ', trim($validated['name']));
@@ -40,22 +41,25 @@ class AuthController extends Controller
             $telegram = '@' . ltrim($telegram, '@');
         }
 
-        $user = User::create([
-            'name' => trim($validated['name']),
-            'email' => strtolower(trim($validated['email'])),
-            'password' => Hash::make($validated['password']),
-            'role' => $validated['role'] ?? 'MIS Student',
-            'university' => $validated['university'] ?? 'SETEC Institute',
-            'student_id' => $studentId,
-            'telegram' => $telegram,
-            'year' => $validated['year'] ?? 'Year 2, Semester 1',
-            'avatar_text' => $avatar,
-            'remember_token' => Str::random(60),
-        ]);
+        // Always save/insert directly into MySQL database
+        $user = User::updateOrCreate(
+            ['email' => $email],
+            [
+                'name' => trim($validated['name']),
+                'password' => Hash::make($validated['password']),
+                'role' => $validated['role'] ?? 'MIS Student',
+                'university' => $validated['university'] ?? 'SETEC Institute',
+                'student_id' => $studentId,
+                'telegram' => $telegram,
+                'year' => $validated['year'] ?? 'Year 2, Semester 1',
+                'avatar_text' => $avatar,
+                'remember_token' => Str::random(60),
+            ]
+        );
 
         return response()->json([
             'success' => true,
-            'message' => 'Registration successful! Welcome to SETEC Study Management.',
+            'message' => 'Registration successful! Account saved to database.',
             'token' => $user->remember_token,
             'data' => $user,
         ], 201);
@@ -71,13 +75,13 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $login = trim($validated['login']);
+        $login = strtolower(trim($validated['login']));
         $user = User::where('email', $login)
-            ->orWhere('student_id', $login)
+            ->orWhere('student_id', $validated['login'])
             ->first();
 
         // If no user exists yet in database, create the default demo user if logging in with demo credentials
-        if (!$user && in_array($login, ['sx8@setec.edu.kh', 'monyudom@setec.edu.kh', 'M2425-0384', 'SET-2026-8899'])) {
+        if (!$user && in_array($login, ['sx8@setec.edu.kh', 'monyudom@setec.edu.kh', 'm2425-0384', 'set-2026-8899'])) {
             $user = User::create([
                 'name' => 'SX8 Student',
                 'email' => 'sx8@setec.edu.kh',
@@ -140,9 +144,9 @@ class AuthController extends Controller
             'email' => 'required|string',
         ]);
 
-        $email = trim($validated['email']);
+        $email = strtolower(trim($validated['email']));
         $user = User::where('email', $email)
-            ->orWhere('student_id', $email)
+            ->orWhere('student_id', $validated['email'])
             ->first();
 
         if (!$user) {
@@ -178,9 +182,9 @@ class AuthController extends Controller
             'password' => 'required|string|min:6',
         ]);
 
-        $email = trim($validated['email']);
+        $email = strtolower(trim($validated['email']));
         $user = User::where('email', $email)
-            ->orWhere('student_id', $email)
+            ->orWhere('student_id', $validated['email'])
             ->first();
 
         if (!$user) {
