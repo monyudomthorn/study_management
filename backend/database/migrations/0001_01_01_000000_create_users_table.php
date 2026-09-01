@@ -15,12 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->nullable()->unique();
-            $table->string('role')->default('Computer Science Student');
+            $table->string('role')->default('MIS Student');
             $table->string('university')->default('SETEC Institute');
-            $table->string('student_id')->default('SET-2026-8899');
+            $table->string('student_id')->default('M2425-0384');
             $table->string('telegram')->nullable();
-            $table->string('year')->default('Year 3, Semester 2');
-            $table->string('avatar_text')->default('ST');
+            $table->string('year')->default('Year 2, Semester 1');
+            $table->string('avatar_text')->default('SX');
             $table->string('password')->nullable();
             $table->string('reset_code')->nullable();
             $table->timestamp('reset_code_expires_at')->nullable();

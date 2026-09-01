@@ -1,11 +1,16 @@
 // API Service for Laravel Backend & MySQL Database Integration
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+let rawBase = (import.meta.env.VITE_API_URL || '/api').trim().replace(/\/+$/, '');
+if (rawBase && !rawBase.endsWith('/api') && rawBase !== '/api') {
+  rawBase = `${rawBase}/api`;
+}
+const API_BASE_URL = rawBase;
 
 /**
  * Generic fetch wrapper with JSON serialization & error handling
  */
 async function request(endpoint, options = {}) {
-  const url = `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const url = `${API_BASE_URL}${cleanEndpoint}`;
   
   const token = localStorage.getItem('study_auth_token');
   const headers = {
@@ -32,7 +37,7 @@ async function request(endpoint, options = {}) {
     }
 
     if (!response.ok) {
-      const errorMsg = data?.message || data?.error || `HTTP Error ${response.status}: ${response.statusText}`;
+      const errorMsg = data?.message || data?.error || (typeof data === 'string' && data.length < 100 ? data : `HTTP Error ${response.status}: ${response.statusText}`);
       const err = new Error(errorMsg);
       err.status = response.status;
       err.data = data;
@@ -74,9 +79,9 @@ export const api = {
     request('/auth/logout', {
       method: 'POST'
     }),
-  getMe: () => request('/auth/me'),
+  getCurrentUser: () => request('/auth/me'),
 
-  // 1. User Profile API
+  // 1. User Profile
   getUserProfile: () => request('/user/profile'),
   updateUserProfile: (profileData) =>
     request('/user/profile', {
@@ -84,62 +89,56 @@ export const api = {
       body: JSON.stringify(profileData)
     }),
 
-  // 2. Teachers API
-  getTeachers: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return request(`/teachers${query ? `?${query}` : ''}`);
-  },
-  createTeacher: (data) =>
+  // 2. Teachers CRUD
+  getTeachers: () => request('/teachers'),
+  getTeacher: (id) => request(`/teachers/${id}`),
+  createTeacher: (teacherData) =>
     request('/teachers', {
       method: 'POST',
-      body: JSON.stringify(data)
+      body: JSON.stringify(teacherData)
     }),
-  updateTeacher: (id, data) =>
+  updateTeacher: (id, teacherData) =>
     request(`/teachers/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(data)
+      body: JSON.stringify(teacherData)
     }),
   deleteTeacher: (id) =>
     request(`/teachers/${id}`, {
       method: 'DELETE'
     }),
 
-  // 3. Subjects API
-  getSubjects: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return request(`/subjects${query ? `?${query}` : ''}`);
-  },
-  createSubject: (data) =>
+  // 3. Subjects CRUD
+  getSubjects: () => request('/subjects'),
+  getSubject: (id) => request(`/subjects/${id}`),
+  createSubject: (subjectData) =>
     request('/subjects', {
       method: 'POST',
-      body: JSON.stringify(data)
+      body: JSON.stringify(subjectData)
     }),
-  updateSubject: (id, data) =>
+  updateSubject: (id, subjectData) =>
     request(`/subjects/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(data)
+      body: JSON.stringify(subjectData)
     }),
   deleteSubject: (id) =>
     request(`/subjects/${id}`, {
       method: 'DELETE'
     }),
 
-  // 4. Practices API
-  getPractices: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return request(`/practices${query ? `?${query}` : ''}`);
-  },
-  createPractice: (data) =>
+  // 4. Practices CRUD + Toggle
+  getPractices: () => request('/practices'),
+  getPractice: (id) => request(`/practices/${id}`),
+  createPractice: (practiceData) =>
     request('/practices', {
       method: 'POST',
-      body: JSON.stringify(data)
+      body: JSON.stringify(practiceData)
     }),
-  updatePractice: (id, data) =>
+  updatePractice: (id, practiceData) =>
     request(`/practices/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(data)
+      body: JSON.stringify(practiceData)
     }),
-  togglePracticeComplete: (id) =>
+  togglePractice: (id) =>
     request(`/practices/${id}/toggle`, {
       method: 'PATCH'
     }),
@@ -148,22 +147,20 @@ export const api = {
       method: 'DELETE'
     }),
 
-  // 5. Assignments API
-  getAssignments: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return request(`/assignments${query ? `?${query}` : ''}`);
-  },
-  createAssignment: (data) =>
+  // 5. Assignments CRUD + Toggle
+  getAssignments: () => request('/assignments'),
+  getAssignment: (id) => request(`/assignments/${id}`),
+  createAssignment: (assignmentData) =>
     request('/assignments', {
       method: 'POST',
-      body: JSON.stringify(data)
+      body: JSON.stringify(assignmentData)
     }),
-  updateAssignment: (id, data) =>
+  updateAssignment: (id, assignmentData) =>
     request(`/assignments/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(data)
+      body: JSON.stringify(assignmentData)
     }),
-  toggleAssignmentComplete: (id) =>
+  toggleAssignment: (id) =>
     request(`/assignments/${id}/toggle`, {
       method: 'PATCH'
     }),
@@ -175,8 +172,8 @@ export const api = {
   // 6. Dashboard Stats
   getDashboardStats: () => request('/dashboard/stats'),
 
-  // 7. Reset / Seed Default Data
-  resetToDefaultDatabase: () =>
+  // 7. Seed / Reset Database
+  resetDatabase: () =>
     request('/seed-default', {
       method: 'POST'
     })
