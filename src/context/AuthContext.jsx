@@ -2,13 +2,13 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { loadFromStorage, saveToStorage, removeFromStorage, STORAGE_KEYS } from '../utils/localStorage';
 
 const DEFAULT_USER_PROFILE = {
-  name: "Vibol Sok",
+  name: "Monyudom Thorn",
   role: "Computer Science Student",
   university: "SETEC Institute",
   studentId: "SET-2026-8899",
-  telegram: "@vibol_sok",
+  telegram: "@monyudomthorn",
   year: "Year 3, Semester 2",
-  avatarText: "VS"
+  avatarText: "MT"
 };
 
 const AuthContext = createContext();
@@ -36,11 +36,11 @@ export const AuthProvider = ({ children }) => {
   const createUser = (userData) => {
     const avatar = userData.name
       ? userData.name
-          .split(' ')
-          .filter((_, i, arr) => i === 0 || i === arr.length - 1)
-          .map((n) => n[0])
-          .join('')
-          .toUpperCase()
+        .split(' ')
+        .filter((_, i, arr) => i === 0 || i === arr.length - 1)
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
       : 'ST';
 
     let cleanTelegram = (userData.telegram || '').trim();
@@ -80,12 +80,12 @@ export const AuthProvider = ({ children }) => {
 
     const avatar = updatedData.name
       ? updatedData.name
-          .split(' ')
-          .filter((_, i, arr) => i === 0 || i === arr.length - 1)
-          .map((n) => n[0])
-          .join('')
-          .toUpperCase()
-      : currentUser?.avatarText || 'VS';
+        .split(' ')
+        .filter((_, i, arr) => i === 0 || i === arr.length - 1)
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+      : currentUser?.avatarText || 'MT';
 
     const updated = {
       ...currentUser,

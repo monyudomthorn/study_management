@@ -74,7 +74,7 @@ export const ProfileModal = ({ isOpen, onClose }) => {
             }}
           >
             <div className="user-avatar" style={{ width: '50px', height: '50px', fontSize: '1.2rem' }}>
-              {currentUser?.avatarText || 'VS'}
+              {currentUser?.avatarText || 'MT'}
             </div>
             <div>
               <div style={{ fontWeight: 700, color: '#ffffff', fontSize: '1.05rem' }}>

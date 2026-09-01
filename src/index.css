@@ -1602,3 +1602,389 @@ body {
     transform: translateX(0);
   }
 }
+
+/* ----------------------------------------------------
+   RESPONSIVE DESIGN & MOBILE OPTIMIZATIONS
+   ---------------------------------------------------- */
+
+/* Utility Visibility Classes */
+.hide-mobile {
+  display: inline-flex;
+}
+
+.show-mobile {
+  display: none !important;
+}
+
+.sidebar-close-btn {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: auto;
+  font-size: 1.25rem;
+  transition: all 0.15s ease;
+}
+
+.sidebar-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* Tablet & Smaller Screens (<= 1024px) */
+@media (max-width: 1024px) {
+  .main-content-wrapper {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+    z-index: 1000;
+    box-shadow: var(--shadow-lg);
+    width: min(300px, 85vw);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .menu-toggle-btn {
+    display: inline-flex;
+  }
+
+  .app-header {
+    padding: 0 20px;
+  }
+
+  .page-content {
+    padding: 20px 18px 60px;
+  }
+}
+
+/* Medium Mobile & Tablets Portrait (<= 768px) */
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .show-mobile {
+    display: inline-flex !important;
+  }
+
+  .app-header {
+    padding: 0 14px;
+    height: 66px;
+  }
+
+  .header-left {
+    gap: 10px;
+  }
+
+  .header-school-brand {
+    gap: 8px;
+  }
+
+  .header-title-block h1 {
+    font-size: 1.05rem;
+  }
+
+  .header-title-block p {
+    display: none;
+  }
+
+  .header-logo-img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .header-right {
+    gap: 8px;
+  }
+
+  .lang-btn {
+    padding: 4px 8px;
+    font-size: 0.76rem;
+  }
+
+  .btn-reset-demo {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+
+  .page-header-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .page-header-bar .btn,
+  .page-header-bar > div:last-child {
+    width: 100%;
+  }
+
+  .page-header-bar .btn {
+    justify-content: center;
+  }
+
+  .page-title-group h2 {
+    font-size: 1.35rem;
+  }
+
+  .page-title-group p {
+    font-size: 0.82rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .stat-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    font-size: 1.3rem;
+  }
+
+  .progress-hero-card {
+    padding: 20px 18px;
+    margin-bottom: 20px;
+  }
+
+  .progress-hero-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .progress-percentage-hero {
+    font-size: 2.4rem;
+  }
+
+  .cards-grid-3 {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .filter-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .search-input-wrapper {
+    min-width: 100%;
+    width: 100%;
+  }
+
+  .select-filter {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .task-item-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 14px 16px;
+    gap: 12px;
+  }
+
+  .task-actions {
+    width: 100%;
+    justify-content: flex-end;
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 10px;
+    gap: 8px;
+  }
+
+  .custom-table {
+    min-width: 580px;
+  }
+
+  .toast-container {
+    left: 14px;
+    right: 14px;
+    bottom: 18px;
+    max-width: none;
+  }
+
+  .toast {
+    min-width: auto;
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+/* Small Mobile Phones (<= 480px) */
+@media (max-width: 480px) {
+  .app-header {
+    padding: 0 10px;
+    height: 60px;
+  }
+
+  .header-left {
+    gap: 6px;
+  }
+
+  .header-title-block h1 {
+    font-size: 0.95rem;
+  }
+
+  .header-logo-img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .header-right {
+    gap: 4px;
+  }
+
+  .lang-switcher {
+    padding: 2px;
+  }
+
+  .lang-btn {
+    padding: 3px 6px;
+    font-size: 0.72rem;
+  }
+
+  .btn-reset-demo {
+    padding: 5px 8px;
+    font-size: 0.75rem;
+  }
+
+  .menu-toggle-btn {
+    padding: 6px 8px;
+    font-size: 1.1rem;
+  }
+
+  .page-content {
+    padding: 14px 10px 60px;
+  }
+
+  .page-title-group h2 {
+    font-size: 1.2rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 14px;
+  }
+
+  .stat-value {
+    font-size: 1.35rem;
+  }
+
+  .modal-backdrop {
+    padding: 8px;
+    align-items: flex-end;
+  }
+
+  .modal-dialog {
+    max-height: 92vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    width: 100%;
+    margin: 0;
+  }
+
+  .modal-header {
+    padding: 14px 16px;
+  }
+
+  .modal-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .modal-body {
+    padding: 16px 14px;
+    gap: 12px;
+  }
+
+  .modal-footer {
+    padding: 12px 14px;
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .modal-footer > div {
+    width: 100%;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .modal-footer .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .entity-card {
+    padding: 16px 14px;
+  }
+
+  .entity-card-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .entity-card-footer > div {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .teacher-avatar-circle {
+    width: 44px;
+    height: 44px;
+    font-size: 1.1rem;
+  }
+
+  .teacher-contact-list {
+    padding: 10px 12px;
+    font-size: 0.82rem;
+  }
+
+  .progress-percentage-hero {
+    font-size: 2rem;
+  }
+
+  .progress-hero-card {
+    padding: 16px 14px;
+  }
+
+  .progress-hero-details h3 {
+    font-size: 1.1rem;
+  }
+
+  .progress-hero-details p {
+    font-size: 0.8rem;
+    margin-bottom: 12px;
+  }
+}
+

@@ -61,6 +61,14 @@ export const Sidebar = ({ isOpen, onClose }) => {
             <h2>SETEC</h2>
             <p>{t('university')}</p>
           </div>
+          <button
+            type="button"
+            className="sidebar-close-btn show-mobile"
+            onClick={onClose}
+            aria-label="Close menu"
+          >
+            <i className="ri-close-line"></i>
+          </button>
         </div>
 
         {/* Navigation Links */}
@@ -93,7 +101,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
           title={t('editProfileTitle')}
         >
           <div className="user-avatar">
-            {currentUser?.avatarText || 'VS'}
+            {currentUser?.avatarText || 'MT'}
           </div>
           <div className="user-info">
             <div className="user-name">

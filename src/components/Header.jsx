@@ -65,7 +65,7 @@ export const Header = ({ onToggleSidebar }) => {
               className="user-avatar"
               style={{ width: '26px', height: '26px', fontSize: '0.75rem' }}
             >
-              {currentUser?.avatarText || 'VS'}
+              {currentUser?.avatarText || 'MT'}
             </div>
             <span className="hide-mobile" style={{ fontWeight: 600, fontSize: '0.84rem' }}>
               {currentUser?.name || t('studentName')}
