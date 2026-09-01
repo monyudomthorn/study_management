@@ -15,6 +15,23 @@ export const Button = ({
   const sizeClass = size === 'sm' ? 'btn-sm' : '';
   const variantClass = `btn-${variant}`;
 
+  const renderIcon = () => {
+    if (!icon) return null;
+    if (typeof icon === 'string') {
+      return (
+        <i
+          className={icon}
+          style={{ marginRight: '8px', fontSize: '1.15em', display: 'inline-flex', verticalAlign: 'middle' }}
+        ></i>
+      );
+    }
+    return (
+      <span className="btn-icon" style={{ marginRight: '8px', display: 'inline-flex', alignItems: 'center' }}>
+        {icon}
+      </span>
+    );
+  };
+
   return (
     <button
       id={id}
@@ -24,13 +41,7 @@ export const Button = ({
       disabled={disabled}
       title={title}
     >
-      {icon && (
-        typeof icon === 'string' ? (
-          <i className={`${icon}`} style={{ marginRight: '8px', fontSize: '1.1em', verticalAlign: 'middle' }}></i>
-        ) : (
-          <span className="btn-icon" style={{ marginRight: '8px' }}>{icon}</span>
-        )
-      )}
+      {renderIcon()}
       {children}
     </button>
   );

@@ -37,11 +37,11 @@ export const Login = () => {
   };
 
   const handleQuickDemoLogin = async () => {
-    setLoginIdentifier('monyudom@setec.edu.kh');
+    setLoginIdentifier('sx8@setec.edu.kh');
     setPassword('password123');
     setIsSubmitting(true);
     try {
-      const res = await login('monyudom@setec.edu.kh', 'password123');
+      const res = await login('sx8@setec.edu.kh', 'password123');
       addToast(res.message || 'Logged in with Demo Student Account!', 'success');
       navigate('/dashboard');
     } catch (err) {
@@ -84,7 +84,7 @@ export const Login = () => {
                 type="text"
                 className="form-control"
                 style={{ paddingLeft: '40px' }}
-                placeholder="e.g. monyudom@setec.edu.kh or SET-2026-8899"
+                placeholder="e.g. youremail@gmail.com or M2425-0384"
                 value={loginIdentifier}
                 onChange={(e) => setLoginIdentifier(e.target.value)}
                 autoComplete="username"
@@ -142,7 +142,7 @@ export const Login = () => {
             variant="primary"
             className="w-100 auth-submit-btn"
             disabled={isSubmitting}
-            icon={isSubmitting ? 'ri-loader-4-line ri-spin' : 'ri-login-box-line'}
+            icon={<i className={isSubmitting ? 'ri-loader-4-line ri-spin' : 'ri-login-box-line'}></i>}
           >
             {isSubmitting ? 'Signing In...' : 'Sign In'}
           </Button>

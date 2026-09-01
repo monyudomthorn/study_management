@@ -107,7 +107,7 @@ export const ForgotPassword = () => {
 
         {step === 1 ? (
           /* STEP 1 FORM */
-          <form onSubmit={handleRequestCode} className="auth-form">
+          <form onSubmit={handleRequestCode} className="auth-form" autoComplete="off">
             <div className="form-group">
               <label className="form-label" htmlFor="reset-identifier">
                 Student Email or Student ID <span className="text-danger">*</span>
@@ -119,9 +119,10 @@ export const ForgotPassword = () => {
                   type="text"
                   className="form-control"
                   style={{ paddingLeft: '40px' }}
-                  placeholder="e.g. monyudom@setec.edu.kh or SET-2026-8899"
+                  placeholder="e.g. youremail@gmail.com or M2425-0384"
                   value={emailOrId}
                   onChange={(e) => setEmailOrId(e.target.value)}
+                  autoComplete="off"
                   required
                 />
               </div>
@@ -132,14 +133,14 @@ export const ForgotPassword = () => {
               variant="primary"
               className="w-100 auth-submit-btn"
               disabled={isSubmitting}
-              icon={isSubmitting ? 'ri-loader-4-line ri-spin' : 'ri-key-2-line'}
+              icon={<i className={isSubmitting ? 'ri-loader-4-line ri-spin' : 'ri-key-2-line'}></i>}
             >
               {isSubmitting ? 'Sending Request...' : 'Send Verification Code'}
             </Button>
           </form>
         ) : (
           /* STEP 2 FORM */
-          <form onSubmit={handleResetPassword} className="auth-form">
+          <form onSubmit={handleResetPassword} className="auth-form" autoComplete="off">
             {/* Display Code Alert */}
             {generatedCode && (
               <div className="auth-code-alert">
@@ -167,6 +168,7 @@ export const ForgotPassword = () => {
                   maxLength={6}
                   value={inputCode}
                   onChange={(e) => setInputCode(e.target.value)}
+                  autoComplete="off"
                   required
                 />
               </div>
@@ -186,12 +188,14 @@ export const ForgotPassword = () => {
                   placeholder="Min 6 characters"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
+                  autoComplete="new-password"
                   required
                 />
                 <button
                   type="button"
                   className="password-toggle-btn"
                   onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   <i className={showPassword ? 'ri-eye-off-line' : 'ri-eye-line'}></i>
                 </button>
@@ -212,6 +216,7 @@ export const ForgotPassword = () => {
                   placeholder="Repeat new password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
+                  autoComplete="new-password"
                   required
                 />
               </div>
@@ -231,7 +236,7 @@ export const ForgotPassword = () => {
                 variant="primary"
                 style={{ flex: 2 }}
                 disabled={isSubmitting}
-                icon={isSubmitting ? 'ri-loader-4-line ri-spin' : 'ri-check-line'}
+                icon={<i className={isSubmitting ? 'ri-loader-4-line ri-spin' : 'ri-check-line'}></i>}
               >
                 {isSubmitting ? 'Updating...' : 'Update Password'}
               </Button>
