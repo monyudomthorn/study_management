@@ -15,9 +15,9 @@ export const Register = () => {
     name: '',
     email: '',
     studentId: '',
-    role: 'Management Information System (MIS)',
+    role: '',
     university: 'SETEC Institute',
-    year: 'Year 2, Semester 1',
+    year: '',
     telegram: '',
     password: '',
     confirmPassword: ''
@@ -58,6 +58,8 @@ export const Register = () => {
 
       const payload = {
         ...formData,
+        role: formData.role || 'Management Information System (MIS)',
+        year: formData.year || 'Year 2, Semester 1',
         studentId: formData.studentId.trim() || `SET-${Date.now().toString().slice(-4)}`,
         telegram: cleanTelegram
       };
@@ -91,7 +93,7 @@ export const Register = () => {
         </div>
 
         {/* Register Form */}
-        <form onSubmit={handleSubmit} className="auth-form">
+        <form onSubmit={handleSubmit} className="auth-form" autoComplete="off">
           <div className="form-grid-2">
             {/* Full Name */}
             <div className="form-group">
@@ -109,6 +111,7 @@ export const Register = () => {
                   placeholder="e.g. Monyudom Thorn"
                   value={formData.name}
                   onChange={handleChange}
+                  autoComplete="off"
                   required
                 />
               </div>
@@ -127,9 +130,10 @@ export const Register = () => {
                   type="email"
                   className="form-control"
                   style={{ paddingLeft: '40px' }}
-                  placeholder="e.g. monyudom@setec.edu.kh"
+                  placeholder="e.g. yourname@setec.edu.kh"
                   value={formData.email}
                   onChange={handleChange}
+                  autoComplete="off"
                   required
                 />
               </div>
@@ -153,6 +157,7 @@ export const Register = () => {
                   placeholder="e.g. M2425-0384"
                   value={formData.studentId}
                   onChange={handleChange}
+                  autoComplete="off"
                 />
               </div>
             </div>
@@ -169,6 +174,7 @@ export const Register = () => {
                 value={formData.role}
                 onChange={handleChange}
               >
+                <option value="">-- Select Major / Department --</option>
                 <option value="Management Information System (MIS)">Management Information System (MIS)</option>
                 <option value="Business Information Technology (BIT)">Business Information Technology (BIT)</option>
                 <option value="Design (DS)">Design (DS)</option>
@@ -191,6 +197,7 @@ export const Register = () => {
                 value={formData.year}
                 onChange={handleChange}
               >
+                <option value="">-- Select Academic Year --</option>
                 <option value="Year 1, Semester 1">Year 1, Semester 1</option>
                 <option value="Year 1, Semester 2">Year 1, Semester 2</option>
                 <option value="Year 2, Semester 1">Year 2, Semester 1</option>
@@ -215,9 +222,10 @@ export const Register = () => {
                   type="text"
                   className="form-control"
                   style={{ paddingLeft: '40px' }}
-                  placeholder="@monyudomthorn"
+                  placeholder="@username"
                   value={formData.telegram}
                   onChange={handleChange}
+                  autoComplete="off"
                 />
               </div>
             </div>
@@ -240,6 +248,7 @@ export const Register = () => {
                   placeholder="Min 6 characters"
                   value={formData.password}
                   onChange={handleChange}
+                  autoComplete="new-password"
                   required
                 />
                 <button
@@ -269,6 +278,7 @@ export const Register = () => {
                   placeholder="Repeat your password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
+                  autoComplete="new-password"
                   required
                 />
               </div>
@@ -280,7 +290,7 @@ export const Register = () => {
             variant="primary"
             className="w-100 auth-submit-btn"
             disabled={isSubmitting}
-            icon={isSubmitting ? 'ri-loader-4-line ri-spin' : 'ri-user-add-line'}
+            icon="ri-user-add-line"
           >
             {isSubmitting ? 'Creating Account...' : 'Complete Registration'}
           </Button>

@@ -24,7 +24,13 @@ export const Button = ({
       disabled={disabled}
       title={title}
     >
-      {icon && <span className="btn-icon">{icon}</span>}
+      {icon && (
+        typeof icon === 'string' ? (
+          <i className={`${icon}`} style={{ marginRight: '8px', fontSize: '1.1em', verticalAlign: 'middle' }}></i>
+        ) : (
+          <span className="btn-icon" style={{ marginRight: '8px' }}>{icon}</span>
+        )
+      )}
       {children}
     </button>
   );
