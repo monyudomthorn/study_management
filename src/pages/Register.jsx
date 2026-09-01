@@ -178,8 +178,6 @@ export const Register = () => {
                 <option value="Management Information System (MIS)">Management Information System (MIS)</option>
                 <option value="Business Information Technology (BIT)">Business Information Technology (BIT)</option>
                 <option value="Design (DS)">Design (DS)</option>
-                <option value="Computer Science (CS)">Computer Science (CS)</option>
-                <option value="Software Engineering (SE)">Software Engineering (SE)</option>
               </select>
             </div>
           </div>
