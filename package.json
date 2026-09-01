@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "dev:backend": "powershell -Command \"$env:PATH = 'C:\\laragon\\bin\\php\\php-8.3.30-Win32-vs16-x64;C:\\laragon\\bin\\composer;C:\\laragon\\bin\\mysql\\mysql-8.4.3-winx64\\bin;' + $env:PATH; cd backend; php artisan serve --port=8000\"",
+    "db:migrate": "powershell -Command \"$env:PATH = 'C:\\laragon\\bin\\php\\php-8.3.30-Win32-vs16-x64;C:\\laragon\\bin\\composer;C:\\laragon\\bin\\mysql\\mysql-8.4.3-winx64\\bin;' + $env:PATH; cd backend; php artisan migrate\"",
+    "db:seed": "powershell -Command \"$env:PATH = 'C:\\laragon\\bin\\php\\php-8.3.30-Win32-vs16-x64;C:\\laragon\\bin\\composer;C:\\laragon\\bin\\mysql\\mysql-8.4.3-winx64\\bin;' + $env:PATH; cd backend; php artisan db:seed\""
   },
   "allowScripts": {
     "esbuild": true

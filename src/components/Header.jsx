@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
@@ -8,14 +9,23 @@ import { ProfileModal } from './ProfileModal';
 export const Header = ({ onToggleSidebar }) => {
   const { lang, setLanguage, t } = useLanguage();
   const { resetToDefaultData } = useData();
-  const { currentUser } = useAuth();
+  const { currentUser, logout } = useAuth();
   const { addToast } = useToast();
+  const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const handleResetData = () => {
-    if (window.confirm(t('resetDataConfirm'))) {
+    if (window.confirm(t('resetDataConfirm') || 'Are you sure you want to reset all demo data?')) {
       resetToDefaultData();
-      addToast(t('dataResetSuccess'), 'info');
+      addToast(t('dataResetSuccess') || 'Data reset successfully.', 'info');
+    }
+  };
+
+  const handleLogout = async () => {
+    if (window.confirm('Are you sure you want to log out?')) {
+      await logout();
+      addToast('Logged out successfully.', 'info');
+      navigate('/login');
     }
   };
 
@@ -102,6 +112,23 @@ export const Header = ({ onToggleSidebar }) => {
               <i className="ri-translate-2"></i> ខ្មែរ
             </button>
           </div>
+
+          {/* Logout Button */}
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={handleLogout}
+            title="Log Out"
+            style={{
+              padding: '6px 10px',
+              color: '#ef4444',
+              borderColor: 'rgba(239, 68, 68, 0.3)',
+              background: 'rgba(239, 68, 68, 0.08)'
+            }}
+          >
+            <i className="ri-logout-box-r-line"></i>
+            <span className="hide-mobile" style={{ marginLeft: '4px' }}>Logout</span>
+          </button>
         </div>
       </header>
 
