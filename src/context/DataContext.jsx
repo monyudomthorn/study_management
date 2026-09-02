@@ -17,25 +17,25 @@ export const DataProvider = ({ children }) => {
   // 1. Subjects State
   const [subjects, setSubjects] = useState(() => {
     const stored = loadFromStorage(STORAGE_KEYS.SUBJECTS, null);
-    return stored && stored.length > 0 ? stored : INITIAL_SUBJECTS;
+    return stored !== null ? stored : INITIAL_SUBJECTS;
   });
 
   // 2. Teachers State
   const [teachers, setTeachers] = useState(() => {
     const stored = loadFromStorage(STORAGE_KEYS.TEACHERS, null);
-    return stored && stored.length > 0 ? stored : INITIAL_TEACHERS;
+    return stored !== null ? stored : INITIAL_TEACHERS;
   });
 
   // 3. Practices State
   const [practices, setPractices] = useState(() => {
     const stored = loadFromStorage(STORAGE_KEYS.PRACTICES, null);
-    return stored && stored.length > 0 ? stored : INITIAL_PRACTICES;
+    return stored !== null ? stored : INITIAL_PRACTICES;
   });
 
   // 4. Assignments State
   const [assignments, setAssignments] = useState(() => {
     const stored = loadFromStorage(STORAGE_KEYS.ASSIGNMENTS, null);
-    return stored && stored.length > 0 ? stored : INITIAL_ASSIGNMENTS;
+    return stored !== null ? stored : INITIAL_ASSIGNMENTS;
   });
 
   const [isLoading, setIsLoading] = useState(false);

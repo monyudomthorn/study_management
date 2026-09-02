@@ -273,18 +273,6 @@ export const Teachers = () => {
         "Subject / Specialty": "Web Development with React",
         "Telegram": "@sokchea_chan",
         "Description": "Lab 3, Floor 2 | Office hours: Tue-Thu 10AM-12PM"
-      },
-      {
-        "Teacher Name": "Ms. Sreynoch Bun",
-        "Subject / Specialty": "Enterprise System Analysis",
-        "Telegram": "@sreynoch_bun",
-        "Description": "Building B, Room 204 | Office hours: Friday 1PM-3PM"
-      },
-      {
-        "Teacher Name": "Mr. Vanna Sam",
-        "Subject / Specialty": "Network Infrastructure",
-        "Telegram": "@vanna_sam",
-        "Description": "Network Lab, Floor 1 | Office hours: Mon-Fri 8AM-11AM"
       }
     ];
 
