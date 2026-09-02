@@ -162,6 +162,10 @@ export const Login = () => {
             <i className="ri-flashlight-line" style={{ color: 'var(--color-primary)' }}></i>
             Quick 1-Click Demo Login
           </button>
+
+          <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '12px', color: 'var(--text-muted, #94a3b8)' }}>
+            <span>Demo: <code>sx8@setec.edu.kh</code> | Password: <code>password123</code></span>
+          </div>
         </form>
 
         {/* Footer Link to Register */}

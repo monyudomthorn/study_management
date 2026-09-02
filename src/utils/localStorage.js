@@ -8,7 +8,8 @@ const STORAGE_KEYS = {
   PRACTICES: "studytrack_practices_v5",
   ASSIGNMENTS: "studytrack_assignments_v5",
   LANGUAGE: "studytrack_lang_v5",
-  USER: "studytrack_user_v5"
+  USER: "studytrack_user_v5",
+  USERS_LIST: "studytrack_users_list_v5"
 };
 
 export const loadFromStorage = (key, fallback) => {

@@ -2,20 +2,42 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { loadFromStorage, saveToStorage, removeFromStorage, STORAGE_KEYS } from '../utils/localStorage';
 import { api } from '../services/api';
 
-const DEFAULT_USER_PROFILE = {
-  name: "SX8 Student",
-  role: "MIS Student",
-  university: "SETEC Institute",
-  studentId: "M2425-0384",
-  telegram: "@setec_sx8",
-  year: "Year 2, Semester 1",
-  avatarText: "SX",
-  email: "sx8@setec.edu.kh"
-};
+const DEFAULT_USERS_LIST = [
+  {
+    id: 1,
+    name: "SX8 Student",
+    email: "sx8@setec.edu.kh",
+    studentId: "M2425-0384",
+    role: "Management Information System (MIS)",
+    university: "SETEC Institute",
+    year: "Year 2, Semester 1",
+    telegram: "@setec_sx8",
+    avatarText: "SX",
+    password: "password123"
+  },
+  {
+    id: 2,
+    name: "Monyudom Thorn",
+    email: "monyudom@setec.edu.kh",
+    studentId: "M2425-0385",
+    role: "Management Information System (MIS)",
+    university: "SETEC Institute",
+    year: "Year 2, Semester 1",
+    telegram: "@monyudom",
+    avatarText: "MT",
+    password: "password123"
+  }
+];
+
+const DEFAULT_USER_PROFILE = DEFAULT_USERS_LIST[0];
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const [usersList, setUsersList] = useState(() => {
+    return loadFromStorage(STORAGE_KEYS.USERS_LIST, DEFAULT_USERS_LIST);
+  });
+
   const [currentUser, setCurrentUser] = useState(() => {
     return loadFromStorage(STORAGE_KEYS.USER, null);
   });
@@ -25,6 +47,11 @@ export const AuthProvider = ({ children }) => {
   });
 
   const [isLoadingUser, setIsLoadingUser] = useState(false);
+
+  // Sync usersList with localStorage
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.USERS_LIST, usersList);
+  }, [usersList]);
 
   // Sync current user with localStorage
   useEffect(() => {
@@ -47,9 +74,13 @@ export const AuthProvider = ({ children }) => {
   // 1. Login
   const login = async (loginIdentifier, password) => {
     setIsLoadingUser(true);
+    const cleanId = (loginIdentifier || '').trim();
+    const cleanIdLower = cleanId.toLowerCase();
+
     try {
+      // Try backend API if accessible
       const res = await api.login({
-        login: loginIdentifier,
+        login: cleanId,
         password: password
       });
 
@@ -59,7 +90,7 @@ export const AuthProvider = ({ children }) => {
           id: u.id,
           name: u.name,
           email: u.email,
-          role: u.role || 'MIS Student',
+          role: u.role || 'Management Information System (MIS)',
           university: u.university || 'SETEC Institute',
           studentId: u.student_id || u.studentId || 'M2425-0384',
           telegram: u.telegram || '',
@@ -69,19 +100,84 @@ export const AuthProvider = ({ children }) => {
 
         setCurrentUser(normalizedUser);
         if (res.token) setToken(res.token);
-        return { success: true, user: normalizedUser, message: res.message };
+        return { success: true, user: normalizedUser, message: res.message || 'Login successful!' };
       }
       throw new Error(res?.message || 'Login failed');
-    } catch (error) {
-      // Fallback for demo login if offline/local
+    } catch (apiError) {
+      // Offline / LocalStorage fallback login
+      const currentUsers = loadFromStorage(STORAGE_KEYS.USERS_LIST, usersList);
+      
+      const matchedUser = currentUsers.find((u) => {
+        const emailMatch = u.email && u.email.toLowerCase() === cleanIdLower;
+        const idMatch = u.studentId && u.studentId.toLowerCase() === cleanIdLower;
+        const nameMatch = u.name && u.name.toLowerCase() === cleanIdLower;
+        return emailMatch || idMatch || nameMatch;
+      });
+
+      if (matchedUser) {
+        // Password verification (allows standard demo passwords or exact match)
+        if (
+          !matchedUser.password ||
+          matchedUser.password === password ||
+          password === 'password123' ||
+          password === '123456'
+        ) {
+          const userSession = {
+            id: matchedUser.id,
+            name: matchedUser.name,
+            email: matchedUser.email,
+            role: matchedUser.role || 'Management Information System (MIS)',
+            university: matchedUser.university || 'SETEC Institute',
+            studentId: matchedUser.studentId || 'M2425-0384',
+            telegram: matchedUser.telegram || '',
+            year: matchedUser.year || 'Year 2, Semester 1',
+            avatarText: matchedUser.avatarText || 'SX'
+          };
+          setCurrentUser(userSession);
+          setToken(`token-${Date.now()}`);
+          return { success: true, user: userSession, message: 'Login successful! Welcome back.' };
+        } else {
+          throw new Error('Invalid password. Please check your credentials.');
+        }
+      }
+
+      // Check if quick match against default accounts
       if (
-        (loginIdentifier === 'sx8@setec.edu.kh' || loginIdentifier === 'monyudom@setec.edu.kh') &&
-        (password === 'password123' || password === '123456')
+        cleanIdLower === 'sx8@setec.edu.kh' ||
+        cleanIdLower === 'monyudom@setec.edu.kh' ||
+        cleanIdLower === 'm2425-0384' ||
+        cleanIdLower === 'm2425-0385'
       ) {
         const demoUser = loadDemoUser();
         return { success: true, user: demoUser, message: 'Logged in as Demo Student!' };
       }
-      throw error;
+
+      // If user is not yet in the list, auto-create a student profile so login succeeds seamlessly
+      if (cleanId.length >= 3 && password) {
+        const namePart = cleanId.includes('@') ? cleanId.split('@')[0] : cleanId;
+        const displayName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+        const avatar = displayName.slice(0, 2).toUpperCase();
+
+        const newLocalUser = {
+          id: Date.now(),
+          name: displayName,
+          email: cleanId.includes('@') ? cleanId : `${cleanId.toLowerCase()}@setec.edu.kh`,
+          studentId: cleanId.includes('@') ? `SET-${Date.now().toString().slice(-4)}` : cleanId.toUpperCase(),
+          role: 'Management Information System (MIS)',
+          university: 'SETEC Institute',
+          year: 'Year 2, Semester 1',
+          telegram: '',
+          avatarText: avatar,
+          password: password
+        };
+
+        setUsersList((prev) => [...prev, newLocalUser]);
+        setCurrentUser(newLocalUser);
+        setToken(`token-${Date.now()}`);
+        return { success: true, user: newLocalUser, message: 'Welcome! Logged in successfully.' };
+      }
+
+      throw new Error('Login failed. Please enter your email/Student ID and password.');
     } finally {
       setIsLoadingUser(false);
     }
@@ -98,7 +194,7 @@ export const AuthProvider = ({ children }) => {
           id: u.id,
           name: u.name,
           email: u.email,
-          role: u.role || 'MIS Student',
+          role: u.role || 'Management Information System (MIS)',
           university: u.university || 'SETEC Institute',
           studentId: u.student_id || u.studentId || userData.studentId || 'M2425-0384',
           telegram: u.telegram || userData.telegram || '',
@@ -108,10 +204,10 @@ export const AuthProvider = ({ children }) => {
 
         setCurrentUser(normalizedUser);
         if (res.token) setToken(res.token);
-        return { success: true, user: normalizedUser, message: res.message };
+        return { success: true, user: normalizedUser, message: res.message || 'Registration successful!' };
       }
       throw new Error(res?.message || 'Registration failed');
-    } catch (error) {
+    } catch (apiError) {
       // Fallback offline registration
       const nameParts = (userData.name || '').trim().split(' ');
       const avatar = nameParts.length > 1
@@ -122,16 +218,19 @@ export const AuthProvider = ({ children }) => {
         id: Date.now(),
         name: userData.name,
         email: userData.email,
-        role: userData.role || 'MIS Student',
+        role: userData.role || 'Management Information System (MIS)',
         university: userData.university || 'SETEC Institute',
         studentId: userData.studentId || `SET-${Date.now().toString().slice(-4)}`,
         telegram: userData.telegram || '',
         year: userData.year || 'Year 2, Semester 1',
-        avatarText: avatar
+        avatarText: avatar,
+        password: userData.password
       };
+
+      setUsersList((prev) => [...prev.filter((u) => u.email !== localNewUser.email), localNewUser]);
       setCurrentUser(localNewUser);
       setToken(`token-${Date.now()}`);
-      return { success: true, user: localNewUser, message: 'Registration saved!' };
+      return { success: true, user: localNewUser, message: 'Account created successfully!' };
     } finally {
       setIsLoadingUser(false);
     }
@@ -143,7 +242,7 @@ export const AuthProvider = ({ children }) => {
       return await api.forgotPassword(emailOrStudentId);
     } catch (error) {
       // Offline fallback: generate mock 6-digit code
-      const mockCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const mockCode = '123456';
       return {
         success: true,
         reset_code: mockCode,
@@ -157,10 +256,23 @@ export const AuthProvider = ({ children }) => {
     try {
       return await api.resetPassword(payload);
     } catch (error) {
-      if (payload.code === '123456' || payload.code) {
-        return { success: true, message: 'Password reset successfully!' };
-      }
-      throw error;
+      const currentUsers = loadFromStorage(STORAGE_KEYS.USERS_LIST, usersList);
+      const cleanEmailOrId = (payload.email || '').toLowerCase().trim();
+
+      const updatedUsers = currentUsers.map((u) => {
+        if (
+          (u.email && u.email.toLowerCase() === cleanEmailOrId) ||
+          (u.studentId && u.studentId.toLowerCase() === cleanEmailOrId)
+        ) {
+          return { ...u, password: payload.password };
+        }
+        return u;
+      });
+
+      setUsersList(updatedUsers);
+      saveToStorage(STORAGE_KEYS.USERS_LIST, updatedUsers);
+
+      return { success: true, message: 'Password reset successfully! Please log in.' };
     }
   };
 
@@ -203,6 +315,11 @@ export const AuthProvider = ({ children }) => {
     };
 
     setCurrentUser(updated);
+
+    // Sync with usersList
+    setUsersList((prev) =>
+      prev.map((u) => (u.id === updated.id || u.email === updated.email ? { ...u, ...updated } : u))
+    );
 
     try {
       await api.updateUserProfile({
@@ -260,3 +377,4 @@ export const useAuth = () => {
   }
   return context;
 };
+
