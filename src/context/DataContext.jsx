@@ -113,6 +113,36 @@ export const DataProvider = ({ children }) => {
     return newItem;
   };
 
+  const addTeachersBatch = (newTeachersList, replace = false) => {
+    const formatted = newTeachersList.map((t, idx) => {
+      const nameParts = (t.name || '').trim().split(' ');
+      const avatar = nameParts.length > 1
+        ? (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase()
+        : (nameParts[0] ? nameParts[0].slice(0, 2).toUpperCase() : 'TC');
+
+      let cleanTelegram = (t.telegram || '').trim();
+      if (cleanTelegram && !cleanTelegram.startsWith('@')) {
+        cleanTelegram = `@${cleanTelegram}`;
+      }
+
+      return {
+        id: Date.now() + idx,
+        name: t.name || 'Unknown Teacher',
+        subject: t.subject || 'General Subject',
+        telegram: cleanTelegram,
+        description: t.description || '',
+        avatar: t.avatar || avatar
+      };
+    });
+
+    if (replace) {
+      setTeachers(formatted);
+    } else {
+      setTeachers((prev) => [...formatted, ...prev]);
+    }
+    return formatted;
+  };
+
   const updateTeacher = (id, updatedTeacher) => {
     setTeachers((prev) =>
       prev.map((tea) => (tea.id === id ? { ...tea, ...updatedTeacher } : tea))
@@ -281,6 +311,7 @@ export const DataProvider = ({ children }) => {
         deleteSubject,
         // Teacher Operations
         addTeacher,
+        addTeachersBatch,
         updateTeacher,
         deleteTeacher,
         // Practice Operations

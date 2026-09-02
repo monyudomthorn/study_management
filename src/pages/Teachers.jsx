@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
+import * as XLSX from 'xlsx';
 import { useData } from '../context/DataContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
@@ -7,7 +8,7 @@ import { Modal } from '../components/Modal';
 import { ConfirmModal } from '../components/ConfirmModal';
 
 export const Teachers = () => {
-  const { teachers, addTeacher, updateTeacher, deleteTeacher } = useData();
+  const { teachers, addTeacher, addTeachersBatch, updateTeacher, deleteTeacher } = useData();
   const { t } = useLanguage();
   const { addToast } = useToast();
 
@@ -15,6 +16,14 @@ export const Teachers = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+
+  // Excel Import Modal States
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [importedTeachers, setImportedTeachers] = useState([]);
+  const [importFileName, setImportFileName] = useState('');
+  const [importStrategy, setImportStrategy] = useState('append'); // 'append' | 'replace'
+  const [isDragOver, setIsDragOver] = useState(false);
+  const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -106,6 +115,206 @@ export const Teachers = () => {
     return `https://t.me/${clean}`;
   };
 
+  // ==========================================
+  // EXCEL IMPORT & EXPORT LOGIC
+  // ==========================================
+  const handleOpenImportModal = () => {
+    setImportedTeachers([]);
+    setImportFileName('');
+    setImportStrategy('append');
+    setIsImportModalOpen(true);
+  };
+
+  const processExcelFile = (file) => {
+    if (!file) return;
+
+    setImportFileName(file.name);
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const rawRows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+
+        if (!rawRows || rawRows.length === 0) {
+          addToast(t('noValidRowsFound'), 'warning');
+          setImportedTeachers([]);
+          return;
+        }
+
+        // Map flexible column headers
+        const parsed = rawRows
+          .map((row) => {
+            const keys = Object.keys(row);
+            const findVal = (possibleNames) => {
+              for (const name of possibleNames) {
+                const foundKey = keys.find(
+                  (k) => k.trim().toLowerCase() === name.toLowerCase()
+                );
+                if (foundKey && String(row[foundKey]).trim()) {
+                  return String(row[foundKey]).trim();
+                }
+              }
+              return '';
+            };
+
+            const name = findVal([
+              'Teacher Name',
+              'Name',
+              'Teacher',
+              'Full Name',
+              'ឈ្មោះ',
+              'ឈ្មោះសាស្ត្រាចារ្យ'
+            ]);
+
+            const subject = findVal([
+              'Subject / Specialty',
+              'Subject',
+              'Specialty',
+              'Department',
+              'Course',
+              'មុខវិជ្ជា',
+              'ជំនាញ'
+            ]);
+
+            let telegram = findVal([
+              'Telegram',
+              'Telegram Username',
+              'Telegram Handle',
+              'តេឡេក្រាម',
+              'Contact'
+            ]);
+
+            if (telegram && !telegram.startsWith('@')) {
+              telegram = `@${telegram}`;
+            }
+
+            const description = findVal([
+              'Description',
+              'Bio',
+              'Teacher Bio',
+              'Room',
+              'Notes',
+              'Office Hours',
+              'ការពិពណ៌នា'
+            ]);
+
+            return {
+              name,
+              subject: subject || 'General Subject',
+              telegram,
+              description
+            };
+          })
+          .filter((t) => t.name.length > 0);
+
+        if (parsed.length === 0) {
+          addToast(t('noValidRowsFound'), 'error');
+          setImportedTeachers([]);
+          return;
+        }
+
+        setImportedTeachers(parsed);
+        addToast(`Found ${parsed.length} teacher(s) in "${file.name}"!`, 'success');
+      } catch (err) {
+        console.error('Error parsing Excel:', err);
+        addToast(t('importError'), 'error');
+        setImportedTeachers([]);
+      }
+    };
+
+    reader.readAsArrayBuffer(file);
+  };
+
+  const handleFileInputChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processExcelFile(file);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processExcelFile(file);
+    }
+  };
+
+  const handleConfirmImport = () => {
+    if (importedTeachers.length === 0) {
+      addToast(t('noFileSelected'), 'error');
+      return;
+    }
+
+    addTeachersBatch(importedTeachers, importStrategy === 'replace');
+    addToast(
+      `${importedTeachers.length} ${t('importSuccess')}`,
+      'success'
+    );
+    setIsImportModalOpen(false);
+    setImportedTeachers([]);
+  };
+
+  const handleDownloadTemplate = () => {
+    const templateData = [
+      {
+        "Teacher Name": "Dr. Mengly Khorn",
+        "Subject / Specialty": "Database Systems & SQL",
+        "Telegram": "@mengly_khorn",
+        "Description": "Building A, Room 302 | Office hours: Mon-Wed 2PM-4PM"
+      },
+      {
+        "Teacher Name": "Prof. Sokchea Chan",
+        "Subject / Specialty": "Web Development with React",
+        "Telegram": "@sokchea_chan",
+        "Description": "Lab 3, Floor 2 | Office hours: Tue-Thu 10AM-12PM"
+      },
+      {
+        "Teacher Name": "Ms. Sreynoch Bun",
+        "Subject / Specialty": "Enterprise System Analysis",
+        "Telegram": "@sreynoch_bun",
+        "Description": "Building B, Room 204 | Office hours: Friday 1PM-3PM"
+      },
+      {
+        "Teacher Name": "Mr. Vanna Sam",
+        "Subject / Specialty": "Network Infrastructure",
+        "Telegram": "@vanna_sam",
+        "Description": "Network Lab, Floor 1 | Office hours: Mon-Fri 8AM-11AM"
+      }
+    ];
+
+    const worksheet = XLSX.utils.json_to_sheet(templateData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Teachers Template");
+    XLSX.writeFile(workbook, "teachers_sample_template.xlsx");
+    addToast(t('downloadTemplate') + ' downloaded!', 'info');
+  };
+
+  const handleExportExcel = () => {
+    if (teachers.length === 0) {
+      addToast(t('noTeachersFound'), 'warning');
+      return;
+    }
+
+    const exportData = teachers.map((t) => ({
+      "Teacher Name": t.name,
+      "Subject / Specialty": t.subject,
+      "Telegram": t.telegram || '',
+      "Description": t.description || ''
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Teachers");
+    XLSX.writeFile(workbook, `setec_teachers_export_${Date.now()}.xlsx`);
+    addToast(t('exportExcel') + ' downloaded successfully!', 'success');
+  };
+
   return (
     <div className="teachers-page">
       {/* Top Header */}
@@ -116,14 +325,47 @@ export const Teachers = () => {
           </h2>
           <p>{t('teachersSubheading')}</p>
         </div>
-        <Button
-          variant="primary"
-          onClick={handleOpenAddModal}
-          id="btn-add-teacher"
-          icon={<i className="ri-user-add-line"></i>}
-        >
-          {t('inputTeacher')}
-        </Button>
+
+        {/* Action Buttons */}
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={handleExportExcel}
+            title={t('exportExcel')}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <i className="ri-file-download-line"></i>
+            <span className="hide-mobile">{t('exportExcel')}</span>
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={handleOpenImportModal}
+            id="btn-import-excel"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              color: '#10b981',
+              borderColor: 'rgba(16, 185, 129, 0.4)',
+              background: 'rgba(16, 185, 129, 0.08)'
+            }}
+          >
+            <i className="ri-file-excel-2-line"></i>
+            <span>{t('importExcel')}</span>
+          </button>
+
+          <Button
+            variant="primary"
+            onClick={handleOpenAddModal}
+            id="btn-add-teacher"
+            icon={<i className="ri-user-add-line"></i>}
+          >
+            {t('inputTeacher')}
+          </Button>
+        </div>
       </div>
 
       {/* Search Toolbar */}
@@ -149,13 +391,24 @@ export const Teachers = () => {
             <i className="ri-user-search-line"></i>
           </div>
           <h3>{t('noTeachersFound')}</h3>
-          <Button
-            variant="primary"
-            onClick={handleOpenAddModal}
-            icon={<i className="ri-user-add-line"></i>}
-          >
-            {t('inputTeacher')}
-          </Button>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+            <Button
+              variant="primary"
+              onClick={handleOpenAddModal}
+              icon={<i className="ri-user-add-line"></i>}
+            >
+              {t('inputTeacher')}
+            </Button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={handleOpenImportModal}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <i className="ri-file-excel-2-line" style={{ color: '#10b981' }}></i>
+              {t('importExcel')}
+            </button>
+          </div>
         </div>
       ) : (
         <div className="table-responsive">
@@ -174,7 +427,7 @@ export const Teachers = () => {
                   <td>
                     <div className="table-teacher-profile">
                       <div className="teacher-avatar-circle small">
-                        {getInitials(tea.name)}
+                        {tea.avatar || getInitials(tea.name)}
                       </div>
                       <div>
                         <div style={{ fontWeight: 700, color: '#ffffff', fontSize: '0.96rem' }}>
@@ -291,7 +544,6 @@ export const Teachers = () => {
               />
             </div>
 
-            {/* Replaced Email & Phone with Telegram */}
             <div className="form-group">
               <label className="form-label">
                 <i className="ri-telegram-line" style={{ color: '#229ed9', marginRight: '4px' }}></i>
@@ -336,6 +588,187 @@ export const Teachers = () => {
         </form>
       </Modal>
 
+      {/* Modal for Excel Import */}
+      <Modal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        title={t('modalImportTeachers')}
+      >
+        <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+          {/* Top Info & Template Download */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '12px 16px',
+              background: 'rgba(16, 185, 129, 0.08)',
+              border: '1px solid rgba(16, 185, 129, 0.25)',
+              borderRadius: '8px',
+              marginBottom: '16px',
+              flexWrap: 'wrap',
+              gap: '10px'
+            }}
+          >
+            <div>
+              <div style={{ fontWeight: 600, color: '#10b981', fontSize: '0.9rem' }}>
+                <i className="ri-information-line" style={{ marginRight: '6px' }}></i>
+                Supported columns: <code>Name</code>, <code>Subject</code>, <code>Telegram</code>, <code>Description</code>
+              </div>
+              <small style={{ color: 'var(--text-muted)' }}>
+                Accepts .xlsx, .xls, and .csv files
+              </small>
+            </div>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={handleDownloadTemplate}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <i className="ri-download-2-line" style={{ color: '#10b981' }}></i>
+              {t('downloadTemplate')}
+            </button>
+          </div>
+
+          {/* Drag & Drop Dropzone */}
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDragOver(true);
+            }}
+            onDragLeave={() => setIsDragOver(false)}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+            style={{
+              border: `2px dashed ${isDragOver ? '#10b981' : 'var(--border-subtle, #334155)'}`,
+              borderRadius: '12px',
+              padding: '30px 20px',
+              textAlign: 'center',
+              cursor: 'pointer',
+              background: isDragOver ? 'rgba(16, 185, 129, 0.05)' : 'var(--bg-surface-elevated, #1e293b)',
+              transition: 'all 0.2s ease',
+              marginBottom: '20px'
+            }}
+          >
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept=".xlsx, .xls, .csv"
+              style={{ display: 'none' }}
+              onChange={handleFileInputChange}
+            />
+            <div style={{ fontSize: '2.5rem', color: isDragOver ? '#10b981' : '#64748b', marginBottom: '8px' }}>
+              <i className="ri-file-excel-2-line"></i>
+            </div>
+            <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#ffffff', marginBottom: '4px' }}>
+              {importFileName ? importFileName : t('uploadExcelPrompt')}
+            </div>
+            <small style={{ color: 'var(--text-muted)' }}>
+              {importFileName ? 'Click or drag another file to replace' : 'Supports Microsoft Excel (.xlsx, .xls) and CSV'}
+            </small>
+          </div>
+
+          {/* Parsed Teachers Preview */}
+          {importedTeachers.length > 0 && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <h4 style={{ fontSize: '0.96rem', fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <i className="ri-table-line" style={{ color: '#10b981' }}></i>
+                  {t('previewTeachers')} ({importedTeachers.length})
+                </h4>
+              </div>
+
+              {/* Preview Table */}
+              <div style={{ maxHeight: '220px', overflowY: 'auto', border: '1px solid var(--border-subtle, #334155)', borderRadius: '8px', marginBottom: '16px' }}>
+                <table className="custom-table" style={{ fontSize: '0.84rem' }}>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>{t('fieldTeacherName')}</th>
+                      <th>{t('fieldSpecialty')}</th>
+                      <th>{t('fieldTelegram')}</th>
+                      <th>{t('fieldTeacherBio')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {importedTeachers.map((item, idx) => (
+                      <tr key={idx}>
+                        <td style={{ color: 'var(--text-muted)' }}>{idx + 1}</td>
+                        <td style={{ fontWeight: 600, color: '#ffffff' }}>{item.name}</td>
+                        <td>
+                          <span className="teacher-dept-tag" style={{ fontSize: '0.75rem', padding: '2px 8px' }}>
+                            {item.subject}
+                          </span>
+                        </td>
+                        <td>
+                          {item.telegram ? (
+                            <span style={{ color: '#229ed9' }}>{item.telegram}</span>
+                          ) : (
+                            <span style={{ color: 'var(--text-muted)' }}>—</span>
+                          )}
+                        </td>
+                        <td style={{ color: 'var(--text-muted)', maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {item.description || '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Import Strategy Options */}
+              <div style={{ background: 'var(--bg-surface-elevated, #1e293b)', padding: '14px 16px', borderRadius: '8px', border: '1px solid var(--border-subtle, #334155)' }}>
+                <label className="form-label" style={{ marginBottom: '8px' }}>
+                  {t('importMode')}
+                </label>
+                <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.88rem' }}>
+                    <input
+                      type="radio"
+                      name="importStrategy"
+                      value="append"
+                      checked={importStrategy === 'append'}
+                      onChange={() => setImportStrategy('append')}
+                    />
+                    <span>{t('appendMode')}</span>
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.88rem' }}>
+                    <input
+                      type="radio"
+                      name="importStrategy"
+                      value="replace"
+                      checked={importStrategy === 'replace'}
+                      onChange={() => setImportStrategy('replace')}
+                    />
+                    <span style={{ color: '#f59e0b' }}>{t('replaceMode')}</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="modal-footer">
+          <Button
+            variant="secondary"
+            onClick={() => setIsImportModalOpen(false)}
+            icon={<i className="ri-close-line"></i>}
+          >
+            {t('cancel')}
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleConfirmImport}
+            disabled={importedTeachers.length === 0}
+            icon={<i className="ri-file-upload-line"></i>}
+          >
+            {importedTeachers.length > 0
+              ? `${t('confirmImport')} (${importedTeachers.length})`
+              : t('confirmImport')}
+          </Button>
+        </div>
+      </Modal>
+
       {/* Delete Confirmation */}
       <ConfirmModal
         isOpen={Boolean(deleteTarget)}
@@ -346,3 +779,4 @@ export const Teachers = () => {
     </div>
   );
 };
+
