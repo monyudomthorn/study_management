@@ -116,6 +116,13 @@ export const translations = {
     fieldProgress: "Progress Percentage",
     fieldDescription: "Description / Course Notes",
     fieldStatus: "Current Status",
+    modalImportSubjects: "Import Subjects from Excel (.xlsx / .csv)",
+    previewSubjects: "Preview Parsed Subjects",
+    appendModeSubjects: "Append to existing subjects",
+    replaceModeSubjects: "Replace all current subjects",
+    confirmImportSubjects: "Import Subjects Now",
+    importSubjectsSuccess: "Subjects imported successfully!",
+    downloadSubjectTemplate: "Download Subject Template (.xlsx)",
 
     // Teachers Page
     teachersHeading: "Teacher Directory",
@@ -337,6 +344,13 @@ export const translations = {
     fieldProgress: "ភាគរយវឌ្ឍនភាព",
     fieldDescription: "ការពិពណ៌នា / កំណត់សម្គាល់មុខវិជ្ជា",
     fieldStatus: "ស្ថានភាពបច្ចុប្បន្ន",
+    modalImportSubjects: "នាំចូលបញ្ជីមុខវិជ្ជាពី Excel (.xlsx / .csv)",
+    previewSubjects: "មើលទិន្នន័យមុខវិជ្ជាជាមុន",
+    appendModeSubjects: "បន្ថែមលើបញ្ជីមុខវិជ្ជាដែលមានស្រាប់",
+    replaceModeSubjects: "ជំនួសបញ្ជីមុខវិជ្ជាទាំងអស់",
+    confirmImportSubjects: "នាំចូលមុខវិជ្ជាឥឡូវនេះ",
+    importSubjectsSuccess: "បាននាំចូលបញ្ជីមុខវិជ្ជាដោយជោគជ័យ!",
+    downloadSubjectTemplate: "ទាញយកគំរូមុខវិជ្ជា (.xlsx)",
 
     // Teachers Page
     teachersHeading: "បញ្ជីឈ្មោះសាស្ត្រាចារ្យ",

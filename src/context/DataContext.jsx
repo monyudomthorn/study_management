@@ -81,6 +81,33 @@ export const DataProvider = ({ children }) => {
     return newItem;
   };
 
+  const addSubjectsBatch = (newSubjectsList, replace = false) => {
+    const formatted = newSubjectsList.map((s, idx) => {
+      let progress = Number(s.progress);
+      if (isNaN(progress)) progress = 0;
+      progress = Math.min(100, Math.max(0, progress));
+
+      let status = s.status || (progress === 100 ? 'Completed' : progress > 0 ? 'In Progress' : 'Not Started');
+
+      return {
+        id: Date.now() + idx,
+        name: s.name || 'Untitled Subject',
+        code: s.code || `SUB-${String(idx + 1).padStart(3, '0')}`,
+        teacher: s.teacher || 'Assigned Instructor',
+        progress: progress,
+        status: status,
+        description: s.description || ''
+      };
+    });
+
+    if (replace) {
+      setSubjects(formatted);
+    } else {
+      setSubjects((prev) => [...formatted, ...prev]);
+    }
+    return formatted;
+  };
+
   const updateSubject = (id, updatedSubject) => {
     setSubjects((prev) =>
       prev.map((sub) =>
@@ -307,6 +334,7 @@ export const DataProvider = ({ children }) => {
         fetchAllData,
         // Subject Operations
         addSubject,
+        addSubjectsBatch,
         updateSubject,
         deleteSubject,
         // Teacher Operations

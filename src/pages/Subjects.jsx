@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
+import * as XLSX from 'xlsx';
 import { useData } from '../context/DataContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
@@ -9,7 +10,7 @@ import { Modal } from '../components/Modal';
 import { ConfirmModal } from '../components/ConfirmModal';
 
 export const Subjects = () => {
-  const { subjects, teachers, addSubject, updateSubject, deleteSubject } = useData();
+  const { subjects, teachers, addSubject, addSubjectsBatch, updateSubject, deleteSubject } = useData();
   const { t } = useLanguage();
   const { addToast } = useToast();
 
@@ -22,6 +23,14 @@ export const Subjects = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+
+  // Excel Import Modal States
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [importedSubjects, setImportedSubjects] = useState([]);
+  const [importFileName, setImportFileName] = useState('');
+  const [importStrategy, setImportStrategy] = useState('append'); // 'append' | 'replace'
+  const [isDragOver, setIsDragOver] = useState(false);
+  const fileInputRef = useRef(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -100,6 +109,235 @@ export const Subjects = () => {
     }
   };
 
+  // ==========================================
+  // EXCEL IMPORT & EXPORT LOGIC
+  // ==========================================
+  const handleOpenImportModal = () => {
+    setImportedSubjects([]);
+    setImportFileName('');
+    setImportStrategy('append');
+    setIsImportModalOpen(true);
+  };
+
+  const processExcelFile = (file) => {
+    if (!file) return;
+
+    setImportFileName(file.name);
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const rawRows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+
+        if (!rawRows || rawRows.length === 0) {
+          addToast(t('noValidRowsFound'), 'warning');
+          setImportedSubjects([]);
+          return;
+        }
+
+        // Map flexible column headers
+        const parsed = rawRows
+          .map((row, idx) => {
+            const keys = Object.keys(row);
+            const findVal = (possibleNames) => {
+              for (const name of possibleNames) {
+                const foundKey = keys.find(
+                  (k) => k.trim().toLowerCase() === name.toLowerCase()
+                );
+                if (foundKey && String(row[foundKey]).trim()) {
+                  return String(row[foundKey]).trim();
+                }
+              }
+              return '';
+            };
+
+            const name = findVal([
+              'Subject Name',
+              'Name',
+              'Subject',
+              'Course Name',
+              'Course',
+              'Title',
+              'ឈ្មោះមុខវិជ្ជា',
+              'មុខវិជ្ជា'
+            ]);
+
+            const code = findVal([
+              'Subject Code',
+              'Code',
+              'Course Code',
+              'កូដមុខវិជ្ជា',
+              'កូដ'
+            ]) || `SUB-${String(idx + 1).padStart(3, '0')}`;
+
+            const teacher = findVal([
+              'Assigned Teacher',
+              'Teacher',
+              'Instructor',
+              'Professor',
+              'Lecturer',
+              'សាស្ត្រាចារ្យ'
+            ]) || (teachers.length > 0 ? teachers[0].name : 'Assigned Teacher');
+
+            let rawProg = findVal([
+              'Progress (%)',
+              'Progress',
+              'Progress Percentage',
+              'Percentage',
+              'ភាគរយ',
+              'វឌ្ឍនភាព'
+            ]);
+            let progress = Number(rawProg);
+            if (isNaN(progress)) progress = 0;
+            progress = Math.min(100, Math.max(0, progress));
+
+            let status = findVal([
+              'Status',
+              'Current Status',
+              'ស្ថានភាព'
+            ]);
+
+            if (!status) {
+              status = progress === 100 ? 'Completed' : progress > 0 ? 'In Progress' : 'Not Started';
+            }
+
+            const description = findVal([
+              'Description',
+              'Notes',
+              'Course Notes',
+              'Description / Course Notes',
+              'ការពិពណ៌នា'
+            ]);
+
+            return {
+              name,
+              code,
+              teacher,
+              progress,
+              status,
+              description
+            };
+          })
+          .filter((s) => s.name && s.name.length > 0);
+
+        if (parsed.length === 0) {
+          addToast(t('noValidRowsFound'), 'error');
+          setImportedSubjects([]);
+          return;
+        }
+
+        setImportedSubjects(parsed);
+        addToast(`Found ${parsed.length} subject(s) in "${file.name}"!`, 'success');
+      } catch (err) {
+        console.error('Error parsing Excel:', err);
+        addToast(t('importError'), 'error');
+        setImportedSubjects([]);
+      }
+    };
+
+    reader.readAsArrayBuffer(file);
+  };
+
+  const handleFileInputChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processExcelFile(file);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processExcelFile(file);
+    }
+  };
+
+  const handleConfirmImport = () => {
+    if (importedSubjects.length === 0) {
+      addToast(t('noFileSelected'), 'error');
+      return;
+    }
+
+    addSubjectsBatch(importedSubjects, importStrategy === 'replace');
+    addToast(
+      `${importedSubjects.length} ${t('importSubjectsSuccess')}`,
+      'success'
+    );
+    setIsImportModalOpen(false);
+    setImportedSubjects([]);
+  };
+
+  const handleDownloadTemplate = () => {
+    const templateData = [
+      {
+        "Subject Name": "Database Systems & SQL",
+        "Subject Code": "MIS-201",
+        "Assigned Teacher": "Dr. Mengly Khorn",
+        "Progress (%)": 85,
+        "Status": "In Progress",
+        "Description": "Relational database design, normalization, complex SQL joins, indexing, and query optimization."
+      },
+      {
+        "Subject Name": "Web Development with React",
+        "Subject Code": "CS-204",
+        "Assigned Teacher": "Prof. Sokchea Chan",
+        "Progress (%)": 90,
+        "Status": "In Progress",
+        "Description": "Modern frontend application engineering using React, Vite, Hooks, and Component Architecture."
+      },
+      {
+        "Subject Name": "Enterprise System Analysis",
+        "Subject Code": "MIS-205",
+        "Assigned Teacher": "Ms. Sreynoch Bun",
+        "Progress (%)": 70,
+        "Status": "In Progress",
+        "Description": "Software engineering methodologies, UML diagrams, business process workflows, and ERP systems."
+      },
+      {
+        "Subject Name": "Network Infrastructure",
+        "Subject Code": "IT-202",
+        "Assigned Teacher": "Mr. Vanna Sam",
+        "Progress (%)": 60,
+        "Status": "In Progress",
+        "Description": "TCP/IP suite, IPv4/IPv6 subnetting, routing protocols, VLANs, and network security policies."
+      }
+    ];
+
+    const worksheet = XLSX.utils.json_to_sheet(templateData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Subjects Template");
+    XLSX.writeFile(workbook, "subjects_sample_template.xlsx");
+    addToast(t('downloadSubjectTemplate') + ' downloaded!', 'info');
+  };
+
+  const handleExportExcel = () => {
+    if (subjects.length === 0) {
+      addToast(t('noSubjectsFound'), 'warning');
+      return;
+    }
+
+    const exportData = subjects.map((s) => ({
+      "Subject Name": s.name,
+      "Subject Code": s.code,
+      "Assigned Teacher": s.teacher,
+      "Progress (%)": s.progress,
+      "Status": s.status,
+      "Description": s.description || ''
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Subjects");
+    XLSX.writeFile(workbook, `setec_subjects_export_${Date.now()}.xlsx`);
+    addToast(t('exportExcel') + ' downloaded successfully!', 'success');
+  };
+
   return (
     <div className="subjects-page">
       {/* Top Header */}
@@ -110,14 +348,47 @@ export const Subjects = () => {
           </h2>
           <p>{t('subjectsSubheading')}</p>
         </div>
-        <Button
-          variant="primary"
-          onClick={handleOpenAddModal}
-          id="btn-add-subject"
-          icon={<i className="ri-add-line"></i>}
-        >
-          {t('inputSubject')}
-        </Button>
+
+        {/* Action Buttons */}
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={handleExportExcel}
+            title={t('exportExcel')}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <i className="ri-file-download-line"></i>
+            <span className="hide-mobile">{t('exportExcel')}</span>
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={handleOpenImportModal}
+            id="btn-import-subjects-excel"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              color: '#10b981',
+              borderColor: 'rgba(16, 185, 129, 0.4)',
+              background: 'rgba(16, 185, 129, 0.08)'
+            }}
+          >
+            <i className="ri-file-excel-2-line"></i>
+            <span>{t('importExcel')}</span>
+          </button>
+
+          <Button
+            variant="primary"
+            onClick={handleOpenAddModal}
+            id="btn-add-subject"
+            icon={<i className="ri-add-line"></i>}
+          >
+            {t('inputSubject')}
+          </Button>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}
@@ -170,13 +441,24 @@ export const Subjects = () => {
           </div>
           <h3>{t('noSubjectsFound')}</h3>
           <p>{t('searchSubjectsPlaceholder')}</p>
-          <Button
-            variant="primary"
-            onClick={handleOpenAddModal}
-            icon={<i className="ri-add-line"></i>}
-          >
-            {t('inputSubject')}
-          </Button>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+            <Button
+              variant="primary"
+              onClick={handleOpenAddModal}
+              icon={<i className="ri-add-line"></i>}
+            >
+              {t('inputSubject')}
+            </Button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={handleOpenImportModal}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <i className="ri-file-excel-2-line" style={{ color: '#10b981' }}></i>
+              {t('importExcel')}
+            </button>
+          </div>
         </div>
       ) : (
         <div className="table-responsive">
@@ -380,6 +662,177 @@ export const Subjects = () => {
         </form>
       </Modal>
 
+      {/* Modal for Excel Import */}
+      <Modal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        title={t('modalImportSubjects')}
+      >
+        <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+          {/* Top Info & Template Download */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '12px 16px',
+              background: 'rgba(16, 185, 129, 0.08)',
+              border: '1px solid rgba(16, 185, 129, 0.25)',
+              borderRadius: '8px',
+              marginBottom: '16px',
+              flexWrap: 'wrap',
+              gap: '10px'
+            }}
+          >
+            <div>
+              <div style={{ fontWeight: 600, color: '#10b981', fontSize: '0.9rem' }}>
+                <i className="ri-information-line" style={{ marginRight: '6px' }}></i>
+                Supported columns: <code>Subject Name</code>, <code>Subject Code</code>, <code>Assigned Teacher</code>, <code>Progress (%)</code>, <code>Status</code>, <code>Description</code>
+              </div>
+              <small style={{ color: 'var(--text-muted)' }}>
+                Accepts .xlsx, .xls, and .csv files
+              </small>
+            </div>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={handleDownloadTemplate}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <i className="ri-download-2-line" style={{ color: '#10b981' }}></i>
+              {t('downloadSubjectTemplate')}
+            </button>
+          </div>
+
+          {/* Drag & Drop Dropzone */}
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDragOver(true);
+            }}
+            onDragLeave={() => setIsDragOver(false)}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+            style={{
+              border: `2px dashed ${isDragOver ? '#10b981' : 'var(--border-subtle, #334155)'}`,
+              borderRadius: '12px',
+              padding: '30px 20px',
+              textAlign: 'center',
+              cursor: 'pointer',
+              background: isDragOver ? 'rgba(16, 185, 129, 0.05)' : 'var(--bg-surface-elevated, #1e293b)',
+              transition: 'all 0.2s ease',
+              marginBottom: '20px'
+            }}
+          >
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept=".xlsx, .xls, .csv"
+              style={{ display: 'none' }}
+              onChange={handleFileInputChange}
+            />
+            <div style={{ fontSize: '2.5rem', color: isDragOver ? '#10b981' : '#64748b', marginBottom: '8px' }}>
+              <i className="ri-file-excel-2-line"></i>
+            </div>
+            <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#ffffff', marginBottom: '4px' }}>
+              {importFileName ? importFileName : t('uploadExcelPrompt')}
+            </div>
+            <small style={{ color: 'var(--text-muted)' }}>
+              {importFileName ? 'Click or drag another file to replace' : 'Supports Microsoft Excel (.xlsx, .xls) and CSV'}
+            </small>
+          </div>
+
+          {/* Parsed Subjects Preview */}
+          {importedSubjects.length > 0 && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <h4 style={{ fontSize: '0.96rem', fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <i className="ri-table-line" style={{ color: '#10b981' }}></i>
+                  {t('previewSubjects')} ({importedSubjects.length})
+                </h4>
+              </div>
+
+              {/* Preview Table */}
+              <div style={{ maxHeight: '220px', overflowY: 'auto', border: '1px solid var(--border-subtle, #334155)', borderRadius: '8px', marginBottom: '16px' }}>
+                <table className="custom-table" style={{ fontSize: '0.84rem' }}>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>{t('colCode')}</th>
+                      <th>{t('fieldName')}</th>
+                      <th>{t('colTeacher')}</th>
+                      <th>{t('colProgress')}</th>
+                      <th>{t('colStatus')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {importedSubjects.map((item, idx) => (
+                      <tr key={idx}>
+                        <td style={{ color: 'var(--text-muted)' }}>{idx + 1}</td>
+                        <td><span className="entity-code-badge">{item.code}</span></td>
+                        <td style={{ fontWeight: 600, color: '#ffffff' }}>{item.name}</td>
+                        <td>{item.teacher}</td>
+                        <td>{item.progress}%</td>
+                        <td><Badge type="status" value={item.status} /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Import Strategy Options */}
+              <div style={{ background: 'var(--bg-surface-elevated, #1e293b)', padding: '14px 16px', borderRadius: '8px', border: '1px solid var(--border-subtle, #334155)' }}>
+                <label className="form-label" style={{ marginBottom: '8px' }}>
+                  {t('importMode')}
+                </label>
+                <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.88rem' }}>
+                    <input
+                      type="radio"
+                      name="importStrategySubjects"
+                      value="append"
+                      checked={importStrategy === 'append'}
+                      onChange={() => setImportStrategy('append')}
+                    />
+                    <span>{t('appendModeSubjects')}</span>
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.88rem' }}>
+                    <input
+                      type="radio"
+                      name="importStrategySubjects"
+                      value="replace"
+                      checked={importStrategy === 'replace'}
+                      onChange={() => setImportStrategy('replace')}
+                    />
+                    <span style={{ color: '#f59e0b' }}>{t('replaceModeSubjects')}</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="modal-footer">
+          <Button
+            variant="secondary"
+            onClick={() => setIsImportModalOpen(false)}
+            icon={<i className="ri-close-line"></i>}
+          >
+            {t('cancel')}
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleConfirmImport}
+            disabled={importedSubjects.length === 0}
+            icon={<i className="ri-file-upload-line"></i>}
+          >
+            {importedSubjects.length > 0
+              ? `${t('confirmImportSubjects')} (${importedSubjects.length})`
+              : t('confirmImportSubjects')}
+          </Button>
+        </div>
+      </Modal>
+
       {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={Boolean(deleteTarget)}
@@ -390,3 +843,4 @@ export const Subjects = () => {
     </div>
   );
 };
+
