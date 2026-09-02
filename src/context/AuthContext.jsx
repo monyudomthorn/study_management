@@ -1,6 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { loadFromStorage, saveToStorage, removeFromStorage, STORAGE_KEYS } from '../utils/localStorage';
-import { api } from '../services/api';
 
 const DEFAULT_USERS_LIST = [
   {
@@ -78,33 +77,6 @@ export const AuthProvider = ({ children }) => {
     const cleanIdLower = cleanId.toLowerCase();
 
     try {
-      // Try backend API if accessible
-      const res = await api.login({
-        login: cleanId,
-        password: password
-      });
-
-      if (res?.success && res?.data) {
-        const u = res.data;
-        const normalizedUser = {
-          id: u.id,
-          name: u.name,
-          email: u.email,
-          role: u.role || 'Management Information System (MIS)',
-          university: u.university || 'SETEC Institute',
-          studentId: u.student_id || u.studentId || 'M2425-0384',
-          telegram: u.telegram || '',
-          year: u.year || 'Year 2, Semester 1',
-          avatarText: u.avatar_text || u.avatarText || 'SX'
-        };
-
-        setCurrentUser(normalizedUser);
-        if (res.token) setToken(res.token);
-        return { success: true, user: normalizedUser, message: res.message || 'Login successful!' };
-      }
-      throw new Error(res?.message || 'Login failed');
-    } catch (apiError) {
-      // Offline / LocalStorage fallback login
       const currentUsers = loadFromStorage(STORAGE_KEYS.USERS_LIST, usersList);
       
       const matchedUser = currentUsers.find((u) => {
@@ -115,7 +87,6 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (matchedUser) {
-        // Password verification (allows standard demo passwords or exact match)
         if (
           !matchedUser.password ||
           matchedUser.password === password ||
@@ -141,7 +112,7 @@ export const AuthProvider = ({ children }) => {
         }
       }
 
-      // Check if quick match against default accounts
+      // Check if match against default demo accounts
       if (
         cleanIdLower === 'sx8@setec.edu.kh' ||
         cleanIdLower === 'monyudom@setec.edu.kh' ||
@@ -152,7 +123,7 @@ export const AuthProvider = ({ children }) => {
         return { success: true, user: demoUser, message: 'Logged in as Demo Student!' };
       }
 
-      // If user is not yet in the list, auto-create a student profile so login succeeds seamlessly
+      // Auto-create local user profile if valid email / student ID format
       if (cleanId.length >= 3 && password) {
         const namePart = cleanId.includes('@') ? cleanId.split('@')[0] : cleanId;
         const displayName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
@@ -187,28 +158,6 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     setIsLoadingUser(true);
     try {
-      const res = await api.register(userData);
-      if (res?.success && res?.data) {
-        const u = res.data;
-        const normalizedUser = {
-          id: u.id,
-          name: u.name,
-          email: u.email,
-          role: u.role || 'Management Information System (MIS)',
-          university: u.university || 'SETEC Institute',
-          studentId: u.student_id || u.studentId || userData.studentId || 'M2425-0384',
-          telegram: u.telegram || userData.telegram || '',
-          year: u.year || userData.year || 'Year 2, Semester 1',
-          avatarText: u.avatar_text || u.avatarText || 'SX'
-        };
-
-        setCurrentUser(normalizedUser);
-        if (res.token) setToken(res.token);
-        return { success: true, user: normalizedUser, message: res.message || 'Registration successful!' };
-      }
-      throw new Error(res?.message || 'Registration failed');
-    } catch (apiError) {
-      // Fallback offline registration
       const nameParts = (userData.name || '').trim().split(' ');
       const avatar = nameParts.length > 1
         ? (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase()
@@ -238,56 +187,41 @@ export const AuthProvider = ({ children }) => {
 
   // 3. Forgot Password
   const forgotPassword = async (emailOrStudentId) => {
-    try {
-      return await api.forgotPassword(emailOrStudentId);
-    } catch (error) {
-      // Offline fallback: generate mock 6-digit code
-      const mockCode = '123456';
-      return {
-        success: true,
-        reset_code: mockCode,
-        message: 'Verification code generated for testing.'
-      };
-    }
+    const mockCode = '123456';
+    return {
+      success: true,
+      reset_code: mockCode,
+      message: 'Verification code generated.'
+    };
   };
 
   // 4. Reset Password
   const resetPassword = async (payload) => {
-    try {
-      return await api.resetPassword(payload);
-    } catch (error) {
-      const currentUsers = loadFromStorage(STORAGE_KEYS.USERS_LIST, usersList);
-      const cleanEmailOrId = (payload.email || '').toLowerCase().trim();
+    const currentUsers = loadFromStorage(STORAGE_KEYS.USERS_LIST, usersList);
+    const cleanEmailOrId = (payload.email || '').toLowerCase().trim();
 
-      const updatedUsers = currentUsers.map((u) => {
-        if (
-          (u.email && u.email.toLowerCase() === cleanEmailOrId) ||
-          (u.studentId && u.studentId.toLowerCase() === cleanEmailOrId)
-        ) {
-          return { ...u, password: payload.password };
-        }
-        return u;
-      });
+    const updatedUsers = currentUsers.map((u) => {
+      if (
+        (u.email && u.email.toLowerCase() === cleanEmailOrId) ||
+        (u.studentId && u.studentId.toLowerCase() === cleanEmailOrId)
+      ) {
+        return { ...u, password: payload.password };
+      }
+      return u;
+    });
 
-      setUsersList(updatedUsers);
-      saveToStorage(STORAGE_KEYS.USERS_LIST, updatedUsers);
+    setUsersList(updatedUsers);
+    saveToStorage(STORAGE_KEYS.USERS_LIST, updatedUsers);
 
-      return { success: true, message: 'Password reset successfully! Please log in.' };
-    }
+    return { success: true, message: 'Password reset successfully! Please log in.' };
   };
 
   // 5. Logout
   const logout = async () => {
-    try {
-      await api.logout();
-    } catch (err) {
-      // Ignore network errors on logout
-    } finally {
-      setCurrentUser(null);
-      setToken(null);
-      localStorage.removeItem('study_auth_token');
-      removeFromStorage(STORAGE_KEYS.USER);
-    }
+    setCurrentUser(null);
+    setToken(null);
+    localStorage.removeItem('study_auth_token');
+    removeFromStorage(STORAGE_KEYS.USER);
   };
 
   // 6. Update user profile
@@ -320,21 +254,6 @@ export const AuthProvider = ({ children }) => {
     setUsersList((prev) =>
       prev.map((u) => (u.id === updated.id || u.email === updated.email ? { ...u, ...updated } : u))
     );
-
-    try {
-      await api.updateUserProfile({
-        name: updated.name,
-        role: updated.role,
-        university: updated.university,
-        student_id: updated.studentId,
-        telegram: updated.telegram,
-        year: updated.year,
-        avatar_text: updated.avatarText,
-        email: updated.email
-      });
-    } catch (err) {
-      console.warn('Updated profile locally (API notice:', err.message, ')');
-    }
 
     return updated;
   };
