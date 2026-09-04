@@ -263,16 +263,16 @@ export const Teachers = () => {
   const handleDownloadTemplate = () => {
     const templateData = [
       {
-        "Teacher Name": "Dr. Mengly Khorn",
-        "Subject / Specialty": "Database Systems & SQL",
-        "Telegram": "@mengly_khorn",
-        "Description": "Building A, Room 302 | Office hours: Mon-Wed 2PM-4PM"
+        "Teacher Name": "OU Rina",
+        "Subject / Specialty": "Studio Photography",
+        "Telegram": "@ourinaphotography",
+        "Description": "Room 302 |Mon-Wed 2PM-4PM"
       },
       {
-        "Teacher Name": "Prof. Sokchea Chan",
-        "Subject / Specialty": "Web Development with React",
-        "Telegram": "@sokchea_chan",
-        "Description": "Lab 3, Floor 2 | Office hours: Tue-Thu 10AM-12PM"
+        "Teacher Name": "HENG Monorom",
+        "Subject / Specialty": "Web Development II",
+        "Telegram": "@hengmonorom",
+        "Description": "Room 101 |Mon-Wed 2PM-4PM"
       }
     ];
 
