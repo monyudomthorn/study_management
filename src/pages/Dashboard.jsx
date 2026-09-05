@@ -10,6 +10,7 @@ import { Badge } from '../components/Badge';
 import { Button } from '../components/Button';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { Modal } from '../components/Modal';
+import { UserAvatar } from '../components/UserAvatar';
 
 export const Dashboard = () => {
   const {
@@ -104,14 +105,17 @@ export const Dashboard = () => {
     <div className="dashboard-page">
       {/* Welcome Banner */}
       <div className="page-header-bar">
-        <div className="page-title-group">
-          <h2>
-            {t('welcomeBack')}{' '}
-            <span style={{ color: 'var(--primary-light)' }}>
-              {currentUser?.name || 'SETEC'}
-            </span>
-          </h2>
-          <p>{currentUser?.role || t('studentRole')} — {currentUser?.university || t('university')}</p>
+        <div className="page-title-group" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <UserAvatar user={currentUser} size={54} />
+          <div>
+            <h2>
+              {t('welcomeBack')}{' '}
+              <span style={{ color: 'var(--primary-light)' }}>
+                {currentUser?.name || 'SETEC'}
+              </span>
+            </h2>
+            <p>{currentUser?.role || t('studentRole')} — {currentUser?.university || t('university')}</p>
+          </div>
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
           <Button

@@ -224,6 +224,20 @@ export const translations = {
     placeholderYear: "e.g. Year 3, Semester 2",
     setecStudentLabel: "SETEC Student",
 
+    // User Profile Image
+    fieldProfileImage: "Profile Photo",
+    uploadPhoto: "Upload Photo",
+    changePhoto: "Change Photo",
+    removePhoto: "Remove Photo",
+    photoUrlLabel: "Image Web URL",
+    placeholderPhotoUrl: "https://example.com/avatar.jpg",
+    presetAvatars: "Preset Avatars",
+    photoUploadHint: "Upload PNG, JPG, or WebP. Or paste an image URL.",
+    imageLoadedSuccess: "Profile image loaded!",
+    imageUploadSuccess: "Profile image uploaded!",
+    imageRemovedSuccess: "Profile image removed.",
+    invalidImageFile: "Please select a valid image file (PNG, JPG, WebP, GIF).",
+
     // Quick Stats Widget
     daysLeft: "days left",
     overdue: "Overdue",
@@ -451,6 +465,20 @@ export const translations = {
     placeholderStudentID: "ឧ. SET-2026-8899",
     placeholderYear: "ឧ. ឆ្នាំទី ៣, ឆមាសទី ២",
     setecStudentLabel: "និស្សិតសេតិច",
+
+    // User Profile Image
+    fieldProfileImage: "រូបថតប្រវត្តិរូប",
+    uploadPhoto: "ផ្ទុកឡើងរូបថត",
+    changePhoto: "ប្តូររូបថត",
+    removePhoto: "លុបរូបថតចេញ",
+    photoUrlLabel: "តំណភ្ជាប់រូបភាព (URL)",
+    placeholderPhotoUrl: "https://example.com/avatar.jpg",
+    presetAvatars: "រូបតំណាងគំរូ",
+    photoUploadHint: "គាំទ្រឯកសារ PNG, JPG ឬ WebP ឬបញ្ចូលតំណភ្ជាប់ URL",
+    imageLoadedSuccess: "បានផ្ទុកឡើងរូបភាពដោយជោគជ័យ!",
+    imageUploadSuccess: "បានផ្ទុកឡើងរូបថតដោយជោគជ័យ!",
+    imageRemovedSuccess: "បានលុបរូបថតចេញដោយជោគជ័យ!",
+    invalidImageFile: "សូមជ្រើសរើសឯកសាររូបភាពត្រឹមត្រូវ (PNG, JPG, WebP, GIF)។",
 
     // Quick Stats Widget
     daysLeft: "ថ្ងៃនៅសល់",

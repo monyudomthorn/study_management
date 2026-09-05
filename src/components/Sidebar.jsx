@@ -4,6 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { ProfileModal } from './ProfileModal';
+import { UserAvatar } from './UserAvatar';
 
 export const Sidebar = ({ isOpen, onClose }) => {
   const { t } = useLanguage();
@@ -100,9 +101,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
           style={{ cursor: 'pointer', transition: 'background-color 0.2s' }}
           title={t('editProfileTitle')}
         >
-          <div className="user-avatar">
-            {currentUser?.avatarText || 'MT'}
-          </div>
+          <UserAvatar user={currentUser} size={42} />
           <div className="user-info">
             <div className="user-name">
               {currentUser?.name || t('studentName')}

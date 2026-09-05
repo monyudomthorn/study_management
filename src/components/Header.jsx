@@ -5,6 +5,7 @@ import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { ProfileModal } from './ProfileModal';
+import { UserAvatar } from './UserAvatar';
 
 export const Header = ({ onToggleSidebar }) => {
   const { lang, setLanguage, t } = useLanguage();
@@ -62,21 +63,21 @@ export const Header = ({ onToggleSidebar }) => {
             className="btn btn-secondary btn-sm"
             onClick={() => setIsProfileOpen(true)}
             style={{
-              padding: '6px 12px',
+              padding: '4px 10px 4px 6px',
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
               background: 'var(--bg-surface-elevated)',
-              borderColor: 'var(--border-subtle)'
+              borderColor: 'var(--border-subtle)',
+              borderRadius: 'var(--radius-full)'
             }}
             title={t('editProfileTitle')}
           >
-            <div
-              className="user-avatar"
-              style={{ width: '26px', height: '26px', fontSize: '0.75rem' }}
-            >
-              {currentUser?.avatarText || 'MT'}
-            </div>
+            <UserAvatar
+              user={currentUser}
+              size={28}
+              showBorder={false}
+            />
             <span className="hide-mobile" style={{ fontWeight: 600, fontSize: '0.84rem' }}>
               {currentUser?.name || t('studentName')}
             </span>

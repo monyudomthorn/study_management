@@ -276,36 +276,36 @@ export const Subjects = () => {
   const handleDownloadTemplate = () => {
     const templateData = [
       {
-        "Subject Name": "Database Systems & SQL",
-        "Subject Code": "MIS-201",
-        "Assigned Teacher": "Dr. Mengly Khorn",
+        "Subject Name": "Computer Accounting",
+        "Subject Code": "C A/C",
+        "Assigned Teacher": "PHON Phanith",
         "Progress (%)": 85,
         "Status": "In Progress",
-        "Description": "Relational database design, normalization, complex SQL joins, indexing, and query optimization."
+        "Description": ""
       },
       {
-        "Subject Name": "Web Development with React",
-        "Subject Code": "CS-204",
-        "Assigned Teacher": "Prof. Sokchea Chan",
-        "Progress (%)": 90,
-        "Status": "In Progress",
-        "Description": "Modern frontend application engineering using React, Vite, Hooks, and Component Architecture."
+        "Subject Name": "Web Development II",
+        "Subject Code": "WD II",
+        "Assigned Teacher": "HENG Monorom",
+        "Progress (%)": 0,
+        "Status": "Not Started",
+        "Description": ""
       },
       {
-        "Subject Name": "Enterprise System Analysis",
-        "Subject Code": "MIS-205",
-        "Assigned Teacher": "Ms. Sreynoch Bun",
-        "Progress (%)": 70,
-        "Status": "In Progress",
-        "Description": "Software engineering methodologies, UML diagrams, business process workflows, and ERP systems."
+        "Subject Name": "C# Programming II",
+        "Subject Code": "C# II",
+        "Assigned Teacher": "CHOEURN Pinchai",
+        "Progress (%)": 0,
+        "Status": "Not Started",
+        "Description": ""
       },
       {
-        "Subject Name": "Network Infrastructure",
-        "Subject Code": "IT-202",
-        "Assigned Teacher": "Mr. Vanna Sam",
-        "Progress (%)": 60,
-        "Status": "In Progress",
-        "Description": "TCP/IP suite, IPv4/IPv6 subnetting, routing protocols, VLANs, and network security policies."
+        "Subject Name": "Networking I",
+        "Subject Code": "NET I",
+        "Assigned Teacher": "PHAN Sopha",
+        "Progress (%)": 0,
+        "Status": "Not Started",
+        "Description": ""
       }
     ];
 

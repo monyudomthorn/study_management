@@ -12,18 +12,7 @@ const DEFAULT_USERS_LIST = [
     year: "Year 2, Semester 1",
     telegram: "@setec_sx8",
     avatarText: "SX",
-    password: "password123"
-  },
-  {
-    id: 2,
-    name: "Monyudom Thorn",
-    email: "monyudom@setec.edu.kh",
-    studentId: "M2425-0385",
-    role: "Management Information System (MIS)",
-    university: "SETEC Institute",
-    year: "Year 2, Semester 1",
-    telegram: "@monyudom",
-    avatarText: "MT",
+    avatarImage: null,
     password: "password123"
   }
 ];
@@ -102,7 +91,8 @@ export const AuthProvider = ({ children }) => {
             studentId: matchedUser.studentId || 'M2425-0384',
             telegram: matchedUser.telegram || '',
             year: matchedUser.year || 'Year 2, Semester 1',
-            avatarText: matchedUser.avatarText || 'SX'
+            avatarText: matchedUser.avatarText || 'SX',
+            avatarImage: matchedUser.avatarImage || null
           };
           setCurrentUser(userSession);
           setToken(`token-${Date.now()}`);
@@ -139,6 +129,7 @@ export const AuthProvider = ({ children }) => {
           year: 'Year 2, Semester 1',
           telegram: '',
           avatarText: avatar,
+          avatarImage: null,
           password: password
         };
 
@@ -173,6 +164,7 @@ export const AuthProvider = ({ children }) => {
         telegram: userData.telegram || '',
         year: userData.year || 'Year 2, Semester 1',
         avatarText: avatar,
+        avatarImage: userData.avatarImage || null,
         password: userData.password
       };
 
@@ -245,6 +237,7 @@ export const AuthProvider = ({ children }) => {
       ...updatedData,
       telegram: cleanTelegram,
       avatarText: avatar,
+      avatarImage: updatedData.avatarImage !== undefined ? updatedData.avatarImage : (currentUser?.avatarImage || null),
       updatedAt: new Date().toISOString()
     };
 
