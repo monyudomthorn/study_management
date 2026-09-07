@@ -215,6 +215,8 @@ export const translations = {
     modalEditAttendance: "Update Attendance Record",
     fieldAttendanceDate: "Attendance Date",
     fieldAttendanceDay: "Day of the Week",
+    fieldDate: "Attendance Date",
+    fieldDay: "Day of the Week",
     fieldRemarks: "Daily Remarks / Notes",
     timeAndSubjectSchedule: "Time & Subject Schedule",
     slot1TimeLabel: "7:00 – 8:30",
@@ -268,6 +270,7 @@ export const translations = {
     placeholderAssignmentTitle: "e.g. Web Front-End Assignment",
     placeholderDesc: "Provide concise instructions, requirements, or study notes...",
     placeholderAttendanceRemarks: "e.g. Completed all lectures and practicals on schedule...",
+    placeholderSlotSubject: "e.g. Computer Accounting",
     placeholderSlotNotes: "e.g. Room 302, Lab 3, Chapter 4 exercises...",
 
     // First Login & User Profile Management
@@ -529,6 +532,8 @@ export const translations = {
     modalEditAttendance: "កែប្រែកំណត់ត្រាវត្តមាន",
     fieldAttendanceDate: "កាលបរិច្ឆេទវត្តមាន",
     fieldAttendanceDay: "ថ្ងៃនៃសប្តាហ៍",
+    fieldDate: "កាលបរិច្ឆេទ",
+    fieldDay: "ថ្ងៃនៃសប្តាហ៍",
     fieldRemarks: "កំណត់សម្គាល់ប្រចាំថ្ងៃ",
     timeAndSubjectSchedule: "កាលវិភាគម៉ោង & មុខវិជ្ជា",
     slot1TimeLabel: "7:00 – 8:30",
@@ -582,6 +587,7 @@ export const translations = {
     placeholderAssignmentTitle: "ឧ. គម្រោងស្រាវជ្រាវបញ្ចប់វគ្គ",
     placeholderDesc: "បញ្ជាក់ការណែនាំ តម្រូវការ ឬកំណត់សម្គាល់ការសិក្សា...",
     placeholderAttendanceRemarks: "ឧ. បានចូលរៀនគ្រប់ម៉ោង និងបំពេញកិច្ចការអនុវត្តទាន់ពេល...",
+    placeholderSlotSubject: "ឧ. Computer Accounting ឬ ជ្រើសរើសមុខវិជ្ជា...",
     placeholderSlotNotes: "ឧ. បន្ទប់ 302, Lab 3, លំហាត់ជំពូកទី ៤...",
 
     // First Login & User Profile Management

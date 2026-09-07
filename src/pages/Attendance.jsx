@@ -116,35 +116,32 @@ export const Attendance = () => {
     setFormFormattedDate(todayInfo.formattedDate);
     setFormRemarks('');
 
-    const defaultSub1 = subjects.length > 0 ? subjects[0].name : 'Computer Accounting';
-    const defaultSub2 = subjects.length > 1 ? subjects[1].name : (subjects[0]?.name || 'Web Development');
-
     setFormSlots([
       {
         slotId: 'slot-1',
         time: '7:00 – 8:30',
-        subject: defaultSub1,
+        subject: '',
         status: 'Present',
-        room: 'Room 302',
-        teacher: teachers.find(t => t.subject === defaultSub1)?.name || '',
+        room: '',
+        teacher: '',
         notes: ''
       },
       {
         slotId: 'slot-2',
         time: '8:45 – 10:15',
-        subject: defaultSub2,
+        subject: '',
         status: 'Present',
-        room: 'Lab 3',
-        teacher: teachers.find(t => t.subject === defaultSub2)?.name || '',
+        room: '',
+        teacher: '',
         notes: ''
       },
       {
         slotId: 'slot-3',
         time: '10:15 – 11:45',
-        subject: defaultSub2,
+        subject: '',
         status: 'Present',
-        room: 'Lab 3',
-        teacher: teachers.find(t => t.subject === defaultSub2)?.name || '',
+        room: '',
+        teacher: '',
         notes: ''
       }
     ]);
@@ -308,6 +305,7 @@ export const Attendance = () => {
 
   // Helper for status badge
   const getStatusBadge = (status) => {
+    if (!status) return null;
     switch (status) {
       case 'Present':
         return <Badge variant="success" icon="ri-checkbox-circle-line">{t('statusPresent')}</Badge>;
@@ -714,6 +712,7 @@ export const Attendance = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={editingAttendance ? t('modalEditAttendance') : t('modalAddAttendance')}
+        maxWidth="720px"
       >
         <form onSubmit={handleFormSubmit} className="custom-form attendance-modal-form">
           {/* Date & Day Header Selector */}
@@ -807,7 +806,7 @@ export const Attendance = () => {
                         type="text"
                         list={`subject-list-${index}`}
                         className="form-input"
-                        placeholder="e.g. Computer Accounting"
+                        placeholder={t('placeholderSlotSubject')}
                         value={slot.subject}
                         onChange={(e) => handleSlotChange(index, 'subject', e.target.value)}
                         required
