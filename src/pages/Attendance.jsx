@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
@@ -18,9 +18,15 @@ import {
   getTodayAcademicInfo,
   getWeekDates,
   getWeekRangeText,
+  getWeekNumberFromDate,
   TOTAL_SEMESTER_WEEKS,
   WEEKLY_TIMETABLE_TEMPLATE
 } from '../utils/dateUtils';
+import {
+  loadFromStorage,
+  saveToStorage,
+  STORAGE_KEYS
+} from '../utils/localStorage';
 
 export const Attendance = () => {
   const {
@@ -37,7 +43,14 @@ export const Attendance = () => {
   const { t, lang } = useLanguage();
   const { addToast } = useToast();
 
-  // Week Navigation State: 1..16 or 'All'
+  // Number of active/added weeks visible to user (default: 1 or saved in localStorage)
+  const [visibleWeeks, setVisibleWeeks] = useState(() => {
+    const saved = loadFromStorage(STORAGE_KEYS.VISIBLE_WEEKS, 1);
+    const parsed = parseInt(saved, 10);
+    return !isNaN(parsed) && parsed >= 1 ? Math.min(TOTAL_SEMESTER_WEEKS, parsed) : 1;
+  });
+
+  // Week Navigation State: 1..visibleWeeks or 'All'
   const [selectedWeek, setSelectedWeek] = useState(1);
 
   // Search & Filter state
@@ -51,6 +64,26 @@ export const Attendance = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAttendance, setEditingAttendance] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleteWeekTarget, setDeleteWeekTarget] = useState(null);
+
+  // Automatically ensure visibleWeeks covers any existing attendance data
+  useEffect(() => {
+    let maxWeekInData = 1;
+    (attendances || []).forEach((att) => {
+      if (att.date) {
+        const wk = getWeekNumberFromDate(att.date);
+        if (wk > maxWeekInData) {
+          maxWeekInData = wk;
+        }
+      }
+    });
+
+    if (maxWeekInData > visibleWeeks) {
+      const clamped = Math.min(TOTAL_SEMESTER_WEEKS, maxWeekInData);
+      setVisibleWeeks(clamped);
+      saveToStorage(STORAGE_KEYS.VISIBLE_WEEKS, clamped);
+    }
+  }, [attendances]);
 
   // Form State
   const [formDate, setFormDate] = useState('');
@@ -89,6 +122,79 @@ export const Attendance = () => {
 
   // Overall Statistics
   const stats = getAttendanceStats();
+
+  // Add next week
+  const handleAddWeek = () => {
+    if (visibleWeeks >= TOTAL_SEMESTER_WEEKS) {
+      addToast(t('maxWeeksReached'), 'warning');
+      return;
+    }
+    const nextWeek = visibleWeeks + 1;
+    setVisibleWeeks(nextWeek);
+    saveToStorage(STORAGE_KEYS.VISIBLE_WEEKS, nextWeek);
+    setSelectedWeek(nextWeek);
+    addToast(
+      lang === 'kh'
+        ? `បានបន្ថែមសប្ដាហ៍ទី ${nextWeek} ដោយជោគជ័យ!`
+        : `Week ${nextWeek} added successfully!`,
+      'success'
+    );
+  };
+
+  // Remove latest week if visibleWeeks > 1
+  const handleRemoveLatestWeek = () => {
+    if (visibleWeeks <= 1) return;
+    const targetWk = visibleWeeks;
+    const weekDays = getWeekDates(targetWk);
+    const hasRecords = attendances.some((a) =>
+      weekDays.some((dayObj) => a.date === dayObj.date || a.formattedDate === dayObj.formattedDate)
+    );
+
+    if (hasRecords) {
+      setDeleteWeekTarget(targetWk);
+    } else {
+      const newCount = visibleWeeks - 1;
+      setVisibleWeeks(newCount);
+      saveToStorage(STORAGE_KEYS.VISIBLE_WEEKS, newCount);
+      if (selectedWeek === targetWk) {
+        setSelectedWeek(newCount);
+      }
+      addToast(
+        lang === 'kh'
+          ? `បានលុបសប្ដាហ៍ទី ${targetWk} រួចរាល់`
+          : `Week ${targetWk} removed`,
+        'info'
+      );
+    }
+  };
+
+  // Confirm delete week with attendance data
+  const handleConfirmDeleteWeek = () => {
+    if (!deleteWeekTarget) return;
+    const weekDays = getWeekDates(deleteWeekTarget);
+    const datesToRemove = new Set(weekDays.map((d) => d.date));
+    const formattedDatesToRemove = new Set(weekDays.map((d) => d.formattedDate));
+
+    // Delete all attendance records in that week
+    const toDelete = attendances.filter(
+      (a) => datesToRemove.has(a.date) || formattedDatesToRemove.has(a.formattedDate)
+    );
+    toDelete.forEach((a) => deleteAttendance(a.id));
+
+    const newCount = Math.max(1, visibleWeeks - 1);
+    setVisibleWeeks(newCount);
+    saveToStorage(STORAGE_KEYS.VISIBLE_WEEKS, newCount);
+    if (selectedWeek >= deleteWeekTarget) {
+      setSelectedWeek(Math.max(1, deleteWeekTarget - 1));
+    }
+    setDeleteWeekTarget(null);
+    addToast(
+      lang === 'kh'
+        ? `បានលុបសប្ដាហ៍ទី ${deleteWeekTarget} និងកំណត់ត្រារួចរាល់`
+        : `Week ${deleteWeekTarget} and its records removed successfully!`,
+      'success'
+    );
+  };
 
   // Week Completion Helper
   const getWeekCompletion = (w) => {
@@ -133,7 +239,7 @@ export const Attendance = () => {
       setSelectedWeek(1);
       return;
     }
-    if (selectedWeek < TOTAL_SEMESTER_WEEKS) {
+    if (selectedWeek < visibleWeeks) {
       setSelectedWeek(selectedWeek + 1);
     }
   };
@@ -145,10 +251,8 @@ export const Attendance = () => {
     }
 
     const weekDays = getWeekDates(selectedWeek);
-    // Reverse so Saturday is on top and Monday is at bottom (matches user screenshot!)
-    const reversedDays = [...weekDays].reverse();
-
-    return reversedDays.map((dayObj) => {
+    // Display Monday at the top through Saturday at the bottom
+    return weekDays.map((dayObj) => {
       const found = attendances.find(
         (a) => a.date === dayObj.date || a.formattedDate === dayObj.formattedDate
       );
@@ -485,11 +589,11 @@ export const Attendance = () => {
 
   const weekTabs = useMemo(() => {
     const list = [];
-    for (let i = 1; i <= TOTAL_SEMESTER_WEEKS; i++) {
+    for (let i = 1; i <= visibleWeeks; i++) {
       list.push(i);
     }
     return list;
-  }, []);
+  }, [visibleWeeks]);
 
   return (
     <div className="attendance-page">
@@ -544,13 +648,79 @@ export const Attendance = () => {
           accentColor="linear-gradient(135deg, #10b981, #6ee7b7)"
         />
         <StatCard
-          title={`${t('lateSessionsCount')} & ${t('absentSessionsCount')}`}
-          value={`${stats.lateCount}L · ${stats.absentCount}A`}
-          description={`${stats.excusedCount} ${t('statusExcused')}`}
-          icon={<i className="ri-time-line"></i>}
-          accentColor="linear-gradient(135deg, #f59e0b, #ef4444)"
+          title={t('absentLimitTitle')}
+          value={`${stats.absentDays} / 19`}
+          description={
+            stats.isDanger
+              ? t('absentLimitDangerDesc')
+              : stats.isWarning
+              ? `${t('absentLimitWarningDesc')} (${stats.remainingAbsents} left)`
+              : `${stats.remainingAbsents} ${t('absentLimitSafeDesc')}`
+          }
+          icon={
+            <i
+              className={
+                stats.isDanger
+                  ? 'ri-error-warning-fill'
+                  : stats.isWarning
+                  ? 'ri-alert-fill'
+                  : 'ri-shield-check-line'
+              }
+            ></i>
+          }
+          accentColor={
+            stats.isDanger
+              ? 'linear-gradient(135deg, #dc2626, #ef4444)'
+              : stats.isWarning
+              ? 'linear-gradient(135deg, #d97706, #f59e0b)'
+              : 'linear-gradient(135deg, #059669, #10b981)'
+          }
         />
       </div>
+
+      {/* Absence Danger Banner (>= 19 absences) */}
+      {stats.isDanger && (
+        <div className="absence-alert-banner banner-danger" style={{ marginBottom: '22px' }}>
+          <div className="absence-alert-icon">
+            <i className="ri-error-warning-fill"></i>
+          </div>
+          <div className="absence-alert-body">
+            <h4>{t('absentLimitDangerDesc')}</h4>
+            <p>{t('absentDangerBannerText')}</p>
+            <div className="absence-meter-track">
+              <div
+                className="absence-meter-fill fill-danger"
+                style={{ width: `${Math.min(100, (stats.absentDays / 19) * 100)}%` }}
+              ></div>
+            </div>
+            <span className="absence-meter-label">
+              {stats.absentDays} / 19 {t('absentDaysCount')} (0 {t('absentLimitSafeDesc')})
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Absence Warning Banner (>= 10 absences) */}
+      {stats.isWarning && !stats.isDanger && (
+        <div className="absence-alert-banner banner-warning" style={{ marginBottom: '22px' }}>
+          <div className="absence-alert-icon">
+            <i className="ri-alert-fill"></i>
+          </div>
+          <div className="absence-alert-body">
+            <h4>{t('absentLimitWarningDesc')} ({stats.absentDays}/19)</h4>
+            <p>{t('absentWarningBannerText').replace('{count}', stats.absentDays)}</p>
+            <div className="absence-meter-track">
+              <div
+                className="absence-meter-fill fill-warning"
+                style={{ width: `${Math.min(100, (stats.absentDays / 19) * 100)}%` }}
+              ></div>
+            </div>
+            <span className="absence-meter-label">
+              {stats.absentDays} / 19 {t('absentDaysCount')} ({stats.remainingAbsents} {t('absentLimitSafeDesc')})
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* ==================================================== */}
       {/* ACADEMIC WEEK NAVIGATION BAR                         */}
@@ -600,6 +770,18 @@ export const Attendance = () => {
                 <span>{t('markAllWeekPresent')}</span>
               </button>
             )}
+
+            {selectedWeek === visibleWeeks && visibleWeeks > 1 && (
+              <button
+                type="button"
+                className="btn-remove-week-action"
+                onClick={handleRemoveLatestWeek}
+                title={t('removeWeekTooltip')}
+              >
+                <i className="ri-delete-bin-line"></i>
+                <span>{t('removeWeek')}</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -640,6 +822,18 @@ export const Attendance = () => {
               );
             })}
 
+            {visibleWeeks < TOTAL_SEMESTER_WEEKS && (
+              <button
+                type="button"
+                className="week-pill-tab week-pill-add-btn"
+                onClick={handleAddWeek}
+                title={`${t('addWeek')} (${lang === 'kh' ? 'សប្ដាហ៍ទី' : 'Week'} ${visibleWeeks + 1})`}
+              >
+                <i className="ri-add-line" style={{ fontSize: '1.05rem', color: 'var(--primary-light)' }}></i>
+                <span className="week-tab-label">{t('addWeek')}</span>
+              </button>
+            )}
+
             <button
               type="button"
               className={`week-pill-tab ${selectedWeek === 'All' ? 'active' : ''}`}
@@ -659,7 +853,7 @@ export const Attendance = () => {
             type="button"
             className="week-nav-arrow"
             onClick={handleNextWeek}
-            disabled={selectedWeek === TOTAL_SEMESTER_WEEKS || selectedWeek === 'All'}
+            disabled={selectedWeek === visibleWeeks || selectedWeek === 'All'}
             title="Next Week"
           >
             <i className="ri-arrow-right-s-line"></i>
@@ -1252,6 +1446,17 @@ export const Attendance = () => {
         onConfirm={handleConfirmDelete}
         title={t('confirmDeleteTitle')}
         message={`${t('confirmDeleteMessage')} (${deleteTarget?.formattedDate || deleteTarget?.date} - ${deleteTarget?.day})`}
+      />
+
+      {/* ========================================== */}
+      {/* DELETE WEEK CONFIRMATION MODAL             */}
+      {/* ========================================== */}
+      <ConfirmModal
+        isOpen={!!deleteWeekTarget}
+        onClose={() => setDeleteWeekTarget(null)}
+        onConfirm={handleConfirmDeleteWeek}
+        title={t('confirmDeleteWeekTitle')}
+        message={`${t('confirmDeleteWeekMessage')} (${lang === 'kh' ? 'សប្ដាហ៍ទី' : 'Week'} ${deleteWeekTarget})`}
       />
     </div>
   );

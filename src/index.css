@@ -3680,8 +3680,141 @@ select:-webkit-autofill:focus {
   border-color: rgba(255, 255, 255, 0.14);
 }
 
+/* Week Add & Remove Action Buttons */
+.week-pill-add-btn {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px dashed rgba(16, 185, 129, 0.45);
+  color: #34d399;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.22s ease-in-out;
+}
 
+.week-pill-add-btn:hover {
+  background: rgba(16, 185, 129, 0.22);
+  border-color: var(--primary-light);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
 
+.week-pill-add-btn:active {
+  transform: translateY(0);
+}
 
+.btn-remove-week-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
 
+.btn-remove-week-action:hover {
+  background: rgba(239, 68, 68, 0.22);
+  border-color: #ef4444;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* Absence Warning & Danger Alert Banner */
+.absence-alert-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  animation: fadeIn 0.3s ease;
+}
+
+.absence-alert-banner.banner-warning {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.42);
+}
+
+.absence-alert-banner.banner-danger {
+  background: rgba(239, 68, 68, 0.14);
+  border: 1px solid rgba(239, 68, 68, 0.48);
+}
+
+.absence-alert-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.banner-warning .absence-alert-icon {
+  color: #fbbf24;
+}
+
+.banner-danger .absence-alert-icon {
+  color: #f87171;
+}
+
+.absence-alert-body {
+  flex: 1;
+}
+
+.absence-alert-body h4 {
+  font-size: 0.98rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.banner-warning .absence-alert-body h4 {
+  color: #fde68a;
+}
+
+.banner-danger .absence-alert-body h4 {
+  color: #fca5a5;
+}
+
+.absence-alert-body p {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin-bottom: 10px;
+}
+
+.absence-meter-track {
+  height: 7px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 6px;
+  max-width: 450px;
+}
+
+.absence-meter-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.absence-meter-fill.fill-warning {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+}
+
+.absence-meter-fill.fill-danger {
+  background: linear-gradient(90deg, #dc2626, #ef4444);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
+}
+
+.absence-meter-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
 

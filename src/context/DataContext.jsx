@@ -441,6 +441,9 @@ export const DataProvider = ({ children }) => {
   };
 
   const getAttendanceStats = () => {
+    const MAX_ABSENT_LIMIT = 19;
+    const WARNING_THRESHOLD = 10;
+
     if (attendances.length === 0) {
       return {
         rate: 100,
@@ -449,30 +452,48 @@ export const DataProvider = ({ children }) => {
         presentCount: 0,
         lateCount: 0,
         absentCount: 0,
-        excusedCount: 0
+        absentDays: 0,
+        absentSlots: 0,
+        excusedCount: 0,
+        maxAbsentLimit: MAX_ABSENT_LIMIT,
+        warningThreshold: WARNING_THRESHOLD,
+        remainingAbsents: MAX_ABSENT_LIMIT,
+        isWarning: false,
+        isDanger: false,
+        status: 'safe'
       };
     }
 
     let totalSlots = 0;
     let presentCount = 0;
     let lateCount = 0;
-    let absentCount = 0;
+    let absentSlots = 0;
     let excusedCount = 0;
+    let absentDays = 0;
 
     attendances.forEach((att) => {
+      let dayHasAbsent = att.overallStatus === 'Absent';
       (att.slots || []).forEach((slot) => {
         if (slot.status !== 'No Class') {
           totalSlots++;
           if (slot.status === 'Present') presentCount++;
           else if (slot.status === 'Late') lateCount++;
-          else if (slot.status === 'Absent') absentCount++;
-          else if (slot.status === 'Excused') excusedCount++;
+          else if (slot.status === 'Absent') {
+            absentSlots++;
+            dayHasAbsent = true;
+          } else if (slot.status === 'Excused') excusedCount++;
         }
       });
+      if (dayHasAbsent) {
+        absentDays++;
+      }
     });
 
     const effectiveScore = presentCount + (lateCount * 0.75) + (excusedCount * 0.9);
     const rate = totalSlots > 0 ? Math.round((effectiveScore / totalSlots) * 100) : 100;
+    const isWarning = absentDays >= WARNING_THRESHOLD && absentDays < MAX_ABSENT_LIMIT;
+    const isDanger = absentDays >= MAX_ABSENT_LIMIT;
+    const remainingAbsents = Math.max(0, MAX_ABSENT_LIMIT - absentDays);
 
     return {
       rate: Math.min(100, Math.max(0, rate)),
@@ -480,8 +501,16 @@ export const DataProvider = ({ children }) => {
       totalSlots,
       presentCount,
       lateCount,
-      absentCount,
-      excusedCount
+      absentCount: absentDays, // 1 absent counted per day with absence
+      absentDays,
+      absentSlots,
+      excusedCount,
+      maxAbsentLimit: MAX_ABSENT_LIMIT,
+      warningThreshold: WARNING_THRESHOLD,
+      remainingAbsents,
+      isWarning,
+      isDanger,
+      status: isDanger ? 'danger' : isWarning ? 'warning' : 'safe'
     };
   };
 

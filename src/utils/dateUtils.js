@@ -295,3 +295,23 @@ export const getWeekRangeText = (weekNum = 1) => {
   return `${first} – ${last}`;
 };
 
+/**
+ * Get the academic week number (1..16) for a given ISO date string
+ * @param {string} dateStr 'YYYY-MM-DD'
+ * @returns {number}
+ */
+export const getWeekNumberFromDate = (dateStr) => {
+  if (!dateStr) return 1;
+  try {
+    const target = new Date(dateStr + 'T00:00:00');
+    const baseStart = new Date(SEMESTER_START_DATE + 'T00:00:00');
+    const diffTime = target.getTime() - baseStart.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays < 0) return 1;
+    return Math.floor(diffDays / 7) + 1;
+  } catch {
+    return 1;
+  }
+};
+
+
