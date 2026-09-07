@@ -11,6 +11,7 @@ import { Button } from '../components/Button';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { Modal } from '../components/Modal';
 import { UserAvatar } from '../components/UserAvatar';
+import { formatDateDDMMMMYYYY, DAY_NAMES_MAP } from '../utils/dateUtils';
 
 export const Dashboard = () => {
   const {
@@ -18,6 +19,8 @@ export const Dashboard = () => {
     teachers,
     practices,
     assignments,
+    attendances,
+    getAttendanceStats,
     calculateOverallProgress,
     toggleAssignmentComplete,
     deleteAssignment,
@@ -26,7 +29,7 @@ export const Dashboard = () => {
   } = useData();
 
   const { currentUser } = useAuth();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { addToast } = useToast();
 
   // Deletion modal state
@@ -45,9 +48,12 @@ export const Dashboard = () => {
   });
 
   const overallProgress = calculateOverallProgress();
+  const attendanceStats = getAttendanceStats();
 
   // Recent assignments
   const recentAssignments = assignments.slice(0, 5);
+  // Recent attendances
+  const recentAttendances = (attendances || []).slice(0, 3);
 
   const handleOpenAddAssignment = () => {
     setEditingAssignment(null);
@@ -101,6 +107,28 @@ export const Dashboard = () => {
     }
   };
 
+  const getDayDisplayName = (dayName) => {
+    if (lang === 'kh' && DAY_NAMES_MAP[dayName]) {
+      return DAY_NAMES_MAP[dayName].kh;
+    }
+    return dayName;
+  };
+
+  const getSlotStatusBadge = (status) => {
+    switch (status) {
+      case 'Present':
+        return <span className="mini-badge-present"><i className="ri-checkbox-circle-line"></i> {t('statusPresent')}</span>;
+      case 'Late':
+        return <span className="mini-badge-late"><i className="ri-time-line"></i> {t('statusLate')}</span>;
+      case 'Absent':
+        return <span className="mini-badge-absent"><i className="ri-close-circle-line"></i> {t('statusAbsent')}</span>;
+      case 'Excused':
+        return <span className="mini-badge-excused"><i className="ri-shield-check-line"></i> {t('statusExcused')}</span>;
+      default:
+        return <span className="mini-badge-default">{status}</span>;
+    }
+  };
+
   return (
     <div className="dashboard-page">
       {/* Welcome Banner */}
@@ -117,7 +145,15 @@ export const Dashboard = () => {
             <p>{currentUser?.role || t('studentRole')} — {currentUser?.university || t('university')}</p>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <Link to="/attendance" style={{ textDecoration: 'none' }}>
+            <Button
+              variant="outline"
+              icon={<i className="ri-calendar-check-line"></i>}
+            >
+              {t('navAttendance')}
+            </Button>
+          </Link>
           <Button
             variant="primary"
             onClick={handleOpenAddAssignment}
@@ -128,8 +164,8 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      {/* 4 Summary Cards */}
-      <div className="stats-grid">
+      {/* 5 Summary Cards */}
+      <div className="stats-grid" style={{ marginBottom: '28px' }}>
         <StatCard
           title={t('statTotalSubjects')}
           value={`${subjects.length} ${t('navSubjects')}`}
@@ -138,11 +174,18 @@ export const Dashboard = () => {
           accentColor="linear-gradient(135deg, #059669, #10b981)"
         />
         <StatCard
+          title={t('statAttendanceRate')}
+          value={`${attendanceStats.rate}%`}
+          description={`${attendanceStats.totalDays} ${t('monToSatDays')}`}
+          icon={<i className="ri-calendar-check-line"></i>}
+          accentColor="linear-gradient(135deg, #047857, #34d399)"
+        />
+        <StatCard
           title={t('statTotalTeachers')}
           value={`${teachers.length} ${t('navTeachers')}`}
           description={t('mentorsAndProfessors')}
           icon={<i className="ri-user-star-line"></i>}
-          accentColor="linear-gradient(135deg, #047857, #34d399)"
+          accentColor="linear-gradient(135deg, #0d9488, #2dd4bf)"
         />
         <StatCard
           title={t('statPracticeTasks')}
@@ -177,6 +220,86 @@ export const Dashboard = () => {
             {overallProgress}<span>%</span>
           </div>
         </div>
+      </div>
+
+      {/* Recent Attendance Records Widget */}
+      <div className="card" style={{ padding: '24px', marginBottom: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
+          <div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <i className="ri-calendar-check-line" style={{ color: 'var(--primary-light)' }}></i>
+              {t('recentAttendance')}
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.84rem' }}>
+              {t('dayRequirementNotice')}
+            </p>
+          </div>
+          <Link
+            to="/attendance"
+            style={{ color: 'var(--primary-light)', fontSize: '0.88rem', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
+          >
+            {t('viewAllAttendance')} <i className="ri-arrow-right-line"></i>
+          </Link>
+        </div>
+
+        {recentAttendances.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-state-icon">
+              <i className="ri-calendar-check-line"></i>
+            </div>
+            <h3>{t('noRecentAttendance')}</h3>
+            <Link to="/attendance" style={{ textDecoration: 'none' }}>
+              <Button
+                variant="primary"
+                icon={<i className="ri-add-line"></i>}
+              >
+                {t('inputAttendance')}
+              </Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="dashboard-attendance-grid">
+            {recentAttendances.map((att) => {
+              const formattedDate = att.formattedDate || formatDateDDMMMMYYYY(att.date);
+              return (
+                <div key={att.id} className="dashboard-attendance-card">
+                  <div className="dashboard-att-card-header">
+                    <div className="dashboard-att-date">
+                      <i className="ri-calendar-event-line" style={{ color: 'var(--primary-light)' }}></i>
+                      <strong>{formattedDate}</strong>
+                    </div>
+                    <span className="dashboard-att-day-tag">
+                      {getDayDisplayName(att.day)}
+                    </span>
+                  </div>
+
+                  <div className="dashboard-att-slots-list">
+                    {(att.slots || []).map((slot, idx) => (
+                      <div key={slot.slotId || idx} className="dashboard-att-slot-row">
+                        <div className="dashboard-slot-time-col">
+                          <span className="dashboard-slot-time">{slot.time}</span>
+                        </div>
+                        <div className="dashboard-slot-subject-col">
+                          <span className="dashboard-slot-subject">{slot.subject || '—'}</span>
+                          {slot.room && <span className="dashboard-slot-room">({slot.room})</span>}
+                        </div>
+                        <div className="dashboard-slot-status-col">
+                          {getSlotStatusBadge(slot.status)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {att.remarks && (
+                    <div className="dashboard-att-remarks">
+                      <i className="ri-sticky-note-line"></i> {att.remarks}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Subject Progress Breakdown Cards */}

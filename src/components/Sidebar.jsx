@@ -8,7 +8,7 @@ import { UserAvatar } from './UserAvatar';
 
 export const Sidebar = ({ isOpen, onClose }) => {
   const { t } = useLanguage();
-  const { subjects, teachers, practices, assignments } = useData();
+  const { subjects, teachers, practices, assignments, attendances } = useData();
   const { currentUser } = useAuth();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
@@ -41,6 +41,12 @@ export const Sidebar = ({ isOpen, onClose }) => {
       iconClass: 'ri-clipboard-line',
       label: t('navAssignments'),
       badge: assignments.length
+    },
+    {
+      to: '/attendance',
+      iconClass: 'ri-calendar-check-line',
+      label: t('navAttendance'),
+      badge: attendances?.length || 0
     }
   ];
 

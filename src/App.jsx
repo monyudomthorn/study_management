@@ -19,6 +19,7 @@ import { Subjects } from './pages/Subjects';
 import { Teachers } from './pages/Teachers';
 import { Practice } from './pages/Practice';
 import { Assignments } from './pages/Assignments';
+import { Attendance } from './pages/Attendance';
 
 // Protected Main Layout Component
 const MainLayout = () => {
@@ -55,6 +56,7 @@ const MainLayout = () => {
             <Route path="/teachers" element={<Teachers />} />
             <Route path="/practice" element={<Practice />} />
             <Route path="/assignments" element={<Assignments />} />
+            <Route path="/attendance" element={<Attendance />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </main>

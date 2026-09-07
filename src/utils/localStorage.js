@@ -5,6 +5,7 @@ const STORAGE_KEYS = {
   TEACHERS: "studytrack_teachers_v5",
   PRACTICES: "studytrack_practices_v5",
   ASSIGNMENTS: "studytrack_assignments_v5",
+  ATTENDANCE: "studytrack_attendance_v5",
   LANGUAGE: "studytrack_lang_v5",
   USER: "studytrack_user_v5",
   USERS_LIST: "studytrack_users_list_v5"
@@ -42,6 +43,7 @@ export const clearAllStudyData = () => {
     localStorage.setItem(STORAGE_KEYS.TEACHERS, JSON.stringify([]));
     localStorage.setItem(STORAGE_KEYS.PRACTICES, JSON.stringify([]));
     localStorage.setItem(STORAGE_KEYS.ASSIGNMENTS, JSON.stringify([]));
+    localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify([]));
   } catch (error) {
     console.error("Error clearing study data:", error);
   }

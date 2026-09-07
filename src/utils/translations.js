@@ -23,16 +23,21 @@ export const translations = {
     navTeachers: "Teachers",
     navPractice: "Practice",
     navAssignments: "Assignments",
+    navAttendance: "Attendance",
 
     // Stat Cards
     statTotalSubjects: "Total Subjects",
     statTotalTeachers: "Total Teachers",
     statPracticeTasks: "Practice Tasks",
     statAssignments: "Assignments",
+    statAttendanceRate: "Attendance Rate",
+    statDaysLogged: "Days Logged",
     activeCourses: "active courses enrolled",
     mentorsAndProfessors: "instructors & mentors",
     completedPractices: "completed so far",
     pendingSubmissions: "pending or in progress",
+    monToSatDays: "Monday to Saturday records",
+    attendedClasses: "class attendance rate",
 
     // Study Progress
     overallStudyProgress: "Overall Study Progress",
@@ -45,6 +50,11 @@ export const translations = {
     recentAssignments: "Recent Assignments",
     viewAllAssignments: "View All Assignments",
     noRecentAssignments: "No assignments found. Click 'Input Assignment' to create one!",
+
+    // Recent Attendance Section
+    recentAttendance: "Recent Attendance Records",
+    viewAllAttendance: "View All Attendance",
+    noRecentAttendance: "No attendance records found. Click 'Record Attendance' to add one!",
 
     // Common Table & Card Headers
     colAssignment: "Assignment",
@@ -60,12 +70,18 @@ export const translations = {
     colCreatedDate: "Created Date",
     colTelegram: "Telegram",
     colDescription: "Description",
+    colDate: "Date (DD-MMMM-YYYY)",
+    colDay: "Day",
+    colTimeAndSubject: "Time & Subject",
+    colSlotsBreakdown: "Class Slots",
+    colRoom: "Room / Notes",
 
     // Actions & Buttons
     inputSubject: "Input Subject",
     inputTeacher: "Input Teacher",
     addPractice: "Add Practice",
     inputAssignment: "Input Assignment",
+    inputAttendance: "Record Attendance",
     update: "Update",
     edit: "Edit",
     delete: "Delete",
@@ -76,25 +92,43 @@ export const translations = {
     markComplete: "Mark Complete",
     markInProgress: "Mark In Progress",
     markPending: "Mark Pending",
+    markAllPresent: "Mark All Present",
     filter: "Filter",
     all: "All",
     search: "Search",
+    exportData: "Export",
 
     // Filter labels
     filterByStatus: "Filter by Status",
     filterByPriority: "Filter by Priority",
     filterBySubject: "Filter by Subject",
     filterByTeacher: "Filter by Teacher",
+    filterByDay: "Filter by Day",
     allSubjects: "All Subjects",
     allTeachers: "All Teachers",
     allStatuses: "All Statuses",
     allPriorities: "All Priorities",
+    allDays: "All Days (Mon-Sat)",
 
     // Status Values
     statusNotStarted: "Not Started",
     statusInProgress: "In Progress",
     statusCompleted: "Completed",
     statusPending: "Pending",
+    statusPresent: "Present",
+    statusLate: "Late",
+    statusAbsent: "Absent",
+    statusExcused: "Excused",
+    statusNoClass: "No Class",
+
+    // Day Names
+    dayMonday: "Monday",
+    dayTuesday: "Tuesday",
+    dayWednesday: "Wednesday",
+    dayThursday: "Thursday",
+    dayFriday: "Friday",
+    daySaturday: "Saturday",
+    daySunday: "Sunday",
 
     // Priority Values
     priorityLow: "Low",
@@ -172,6 +206,42 @@ export const translations = {
     fieldDueDate: "Due Date",
     fieldPriority: "Priority Level",
 
+    // Attendance Page
+    attendanceHeading: "Attendance Management",
+    attendanceSubheading: "Track daily attendance records (Monday to Saturday) with predefined academic time slots and subjects.",
+    searchAttendancePlaceholder: "Search attendance by subject, date (DD-MMMM-YYYY), day...",
+    noAttendanceFound: "No attendance records match your search or filter criteria.",
+    modalAddAttendance: "Record Daily Attendance",
+    modalEditAttendance: "Update Attendance Record",
+    fieldAttendanceDate: "Attendance Date",
+    fieldAttendanceDay: "Day of the Week",
+    fieldRemarks: "Daily Remarks / Notes",
+    timeAndSubjectSchedule: "Time & Subject Schedule",
+    slot1TimeLabel: "7:00 – 8:30",
+    slot2TimeLabel: "8:45 – 10:15",
+    slot3TimeLabel: "10:15 – 11:45",
+    slot1Heading: "7:00 – 8:30 — [Subject]",
+    slot2Heading: "8:45 – 10:15 — [Subject]",
+    slot3Heading: "10:15 – 11:45 — [Subject]",
+    slotSelectSubject: "Select or Enter Subject",
+    slotStatus: "Slot Attendance Status",
+    slotNotes: "Room / Class Notes",
+    errorSundayNotAllowed: "Sundays are not allowed! School attendance only applies from Monday to Saturday.",
+    errorInvalidDate: "Please provide a valid date.",
+    errorSlotSubjects: "Please assign a subject for at least one time slot.",
+    attendanceAddedSuccess: "Attendance record added successfully!",
+    attendanceUpdatedSuccess: "Attendance record updated successfully!",
+    exportAttendanceTitle: "Export Attendance Report",
+    viewModeCards: "Schedule Cards",
+    viewModeTable: "Table View",
+    viewModeWeekly: "Weekly View",
+    totalSessionsCount: "Total Class Sessions",
+    presentSessionsCount: "Present Sessions",
+    lateSessionsCount: "Late Sessions",
+    absentSessionsCount: "Absent Sessions",
+    excusedSessionsCount: "Excused Sessions",
+    dayRequirementNotice: "Academic Schedule: Monday to Saturday only (Sunday excluded).",
+
     // Modals & Confirmations
     confirmDeleteTitle: "Confirm Deletion",
     confirmDeleteMessage: "Are you sure you want to delete this item? This action cannot be undone.",
@@ -197,6 +267,8 @@ export const translations = {
     placeholderPracticeTitle: "e.g. Web Front-End Practice",
     placeholderAssignmentTitle: "e.g. Web Front-End Assignment",
     placeholderDesc: "Provide concise instructions, requirements, or study notes...",
+    placeholderAttendanceRemarks: "e.g. Completed all lectures and practicals on schedule...",
+    placeholderSlotNotes: "e.g. Room 302, Lab 3, Chapter 4 exercises...",
 
     // First Login & User Profile Management
     firstLoginTitle: "Welcome to SETEC StudyTrack!",
@@ -253,7 +325,7 @@ export const translations = {
     studentName: "សុខ វិបុល",
     studentRole: "និស្សិតវិទ្យាសាស្ត្រកុំព្យូទ័រ",
     university: "វិទ្យាស្ថាន ស៊ីតិក (SETEC)",
-    searchPlaceholder: "ស្វែងរកមុខវិជ្ជា សាស្ត្រាចារ្យ កិច្ចការ...",
+    searchPlaceholder: "ស្វែងរកមុខវិជ្ជា សាស្ត្រាចារ្យ កិច្ចការ វត្តមាន...",
     resetData: "កំណត់ទិន្នន័យគំរូឡើងវិញ",
     resetDataConfirm: "តើអ្នកប្រាកដជាចង់កំណត់ទិន្នន័យទាំងអស់ត្រឡប់ទៅជាទិន្នន័យគំរូដើមវិញដែរឬទេ? រាល់ការកែប្រែនឹងត្រូវបាត់បង់។",
     dataResetSuccess: "បានកំណត់ទិន្នន័យដើមឡើងវិញដោយជោគជ័យ!",
@@ -264,17 +336,22 @@ export const translations = {
     navSubjects: "មុខវិជ្ជាសិក្សា",
     navTeachers: "សាស្ត្រាចារ្យ / គ្រូបង្រៀន",
     navPractice: "លំហាត់អនុវត្ត",
-    navAssignments: "កិច្ចការស្រាវជ្រាវ (Assignments)",
+    navAssignments: "កិច្ចការស្រាវជ្រាវ",
+    navAttendance: "វត្តមានសិក្សា",
 
     // Stat Cards
     statTotalSubjects: "មុខវិជ្ជាសរុប",
     statTotalTeachers: "សាស្ត្រាចារ្យសរុប",
     statPracticeTasks: "លំហាត់អនុវត្តសរុប",
     statAssignments: "កិច្ចការសរុប",
+    statAttendanceRate: "អត្រាវត្តមាន",
+    statDaysLogged: "ថ្ងៃបានកត់ត្រា",
     activeCourses: "មុខវិជ្ជាកំពុងរៀន",
     mentorsAndProfessors: "សាស្ត្រាចារ្យ និងអ្នកណែនាំ",
     completedPractices: "បានអនុវត្តរួចរាល់",
     pendingSubmissions: "កំពុងដំណើរការ / រង់ចាំ",
+    monToSatDays: "កំណត់ត្រាពីថ្ងៃច័ន្ទ ដល់ សៅរ៍",
+    attendedClasses: "អត្រាវត្តមានចូលរៀន",
 
     // Study Progress
     overallStudyProgress: "វឌ្ឍនភាពនៃការសិក្សាសរុប",
@@ -287,6 +364,11 @@ export const translations = {
     recentAssignments: "កិច្ចការថ្មីៗ (Recent Assignments)",
     viewAllAssignments: "មើលកិច្ចការទាំងអស់",
     noRecentAssignments: "មិនទាន់មានកិច្ចការនៅឡើយទេ។ សូមចុច 'បញ្ចូលកិច្ចការ' ដើម្បីបង្កើត!",
+
+    // Recent Attendance Section
+    recentAttendance: "កំណត់ត្រាវត្តមានថ្មីៗ",
+    viewAllAttendance: "មើលវត្តមានទាំងអស់",
+    noRecentAttendance: "មិនទាន់មានកំណត់ត្រាវត្តមាននៅឡើយទេ។ សូមចុច 'កត់ត្រាវត្តមាន' ដើម្បីបន្ថែម!",
 
     // Common Table & Card Headers
     colAssignment: "កិច្ចការ",
@@ -302,12 +384,18 @@ export const translations = {
     colCreatedDate: "កាលបរិច្ឆេទបង្កើត",
     colTelegram: "តេឡេក្រាម (Telegram)",
     colDescription: "ការពិពណ៌នា",
+    colDate: "កាលបរិច្ឆេទ (DD-MMMM-YYYY)",
+    colDay: "ថ្ងៃនៃសប្តាហ៍",
+    colTimeAndSubject: "ម៉ោង & មុខវិជ្ជា",
+    colSlotsBreakdown: "ម៉ោងសិក្សានីមួយៗ",
+    colRoom: "បន្ទប់ / កំណត់ចំណាំ",
 
     // Actions & Buttons
     inputSubject: "បញ្ចូលមុខវិជ្ជា",
     inputTeacher: "បញ្ចូលសាស្ត្រាចារ្យ",
     addPractice: "បន្ថែមលំហាត់",
     inputAssignment: "បញ្ចូលកិច្ចការ",
+    inputAttendance: "កត់ត្រាវត្តមាន",
     update: "កែប្រែ",
     edit: "កែសម្រួល",
     delete: "លុបចេញ",
@@ -318,25 +406,43 @@ export const translations = {
     markComplete: "កំណត់ថាបានបញ្ចប់",
     markInProgress: "កំណត់ថាកំពុងធ្វើ",
     markPending: "កំណត់ថារង់ចាំ",
+    markAllPresent: "វត្តមានគ្រប់ម៉ោង",
     filter: "ចម្រាញ់រក",
     all: "ទាំងអស់",
     search: "ស្វែងរក",
+    exportData: "ទាញយកទិន្នន័យ",
 
     // Filter labels
     filterByStatus: "ចម្រាញ់តាមស្ថានភាព",
     filterByPriority: "ចម្រាញ់តាមកម្រិតអាទិភាព",
     filterBySubject: "ចម្រាញ់តាមមុខវិជ្ជា",
     filterByTeacher: "ចម្រាញ់តាមសាស្ត្រាចារ្យ",
+    filterByDay: "ចម្រាញ់តាមថ្ងៃនៃសប្តាហ៍",
     allSubjects: "គ្រប់មុខវិជ្ជា",
     allTeachers: "គ្រប់សាស្ត្រាចារ្យ",
     allStatuses: "គ្រប់ស្ថានភាព",
     allPriorities: "គ្រប់កម្រិតអាទិភាព",
+    allDays: "គ្រប់ថ្ងៃ (ច័ន្ទ ដល់ សៅរ៍)",
 
     // Status Values
     statusNotStarted: "មិនទាន់ចាប់ផ្ដើម",
     statusInProgress: "កំពុងដំណើរការ",
     statusCompleted: "បានបញ្ចប់",
     statusPending: "រង់ចាំដំណើរការ",
+    statusPresent: "វត្តមាន",
+    statusLate: "យឺត",
+    statusAbsent: "អវត្តមាន",
+    statusExcused: "ច្បាប់ / អនុញ្ញាត",
+    statusNoClass: "គ្មានថ្នាក់រៀន",
+
+    // Day Names
+    dayMonday: "ថ្ងៃច័ន្ទ",
+    dayTuesday: "ថ្ងៃអង្គារ",
+    dayWednesday: "ថ្ងៃពុធ",
+    dayThursday: "ថ្ងៃព្រហស្បតិ៍",
+    dayFriday: "ថ្ងៃសុក្រ",
+    daySaturday: "ថ្ងៃសៅរ៍",
+    daySunday: "ថ្ងៃអាទិត្យ",
 
     // Priority Values
     priorityLow: "ទាប",
@@ -414,6 +520,42 @@ export const translations = {
     fieldDueDate: "កាលបរិច្ឆេទកំណត់ប្រគល់",
     fieldPriority: "កម្រិតអាទិភាព",
 
+    // Attendance Page
+    attendanceHeading: "ការគ្រប់គ្រងវត្តមានសិក្សា",
+    attendanceSubheading: "កត់ត្រាវត្តមានប្រចាំថ្ងៃ (ថ្ងៃច័ន្ទ ដល់ សៅរ៍) តាមម៉ោងសិក្សាផ្លូវការ និងមុខវិជ្ជានីមួយៗ។",
+    searchAttendancePlaceholder: "ស្វែងរកវត្តមានតាមមុខវិជ្ជា កាលបរិច្ឆេទ (DD-MMMM-YYYY) ថ្ងៃ...",
+    noAttendanceFound: "រកមិនឃើញកំណត់ត្រាវត្តមានដែលត្រូវនឹងលក្ខខណ្ឌស្វែងរកឡើយ។",
+    modalAddAttendance: "កត់ត្រាវត្តមានប្រចាំថ្ងៃ",
+    modalEditAttendance: "កែប្រែកំណត់ត្រាវត្តមាន",
+    fieldAttendanceDate: "កាលបរិច្ឆេទវត្តមាន",
+    fieldAttendanceDay: "ថ្ងៃនៃសប្តាហ៍",
+    fieldRemarks: "កំណត់សម្គាល់ប្រចាំថ្ងៃ",
+    timeAndSubjectSchedule: "កាលវិភាគម៉ោង & មុខវិជ្ជា",
+    slot1TimeLabel: "7:00 – 8:30",
+    slot2TimeLabel: "8:45 – 10:15",
+    slot3TimeLabel: "10:15 – 11:45",
+    slot1Heading: "7:00 – 8:30 — [មុខវិជ្ជា]",
+    slot2Heading: "8:45 – 10:15 — [មុខវិជ្ជា]",
+    slot3Heading: "10:15 – 11:45 — [មុខវិជ្ជា]",
+    slotSelectSubject: "ជ្រើសរើស ឬវាយឈ្មោះមុខវិជ្ជា",
+    slotStatus: "ស្ថានភាពវត្តមាន",
+    slotNotes: "បន្ទប់ / កំណត់ចំណាំម៉ោងរៀន",
+    errorSundayNotAllowed: "មិនអនុញ្ញាតឱ្យជ្រើសរើសថ្ងៃអាទិត្យឡើយ! ការកត់ត្រាវត្តមានអនុវត្តតែពីថ្ងៃច័ន្ទ ដល់ ថ្ងៃសៅរ៍។",
+    errorInvalidDate: "សូមជ្រើសរើសកាលបរិច្ឆេទត្រឹមត្រូវ។",
+    errorSlotSubjects: "សូមកំណត់មុខវិជ្ជាយ៉ាងហោចណាស់មួយម៉ោងសិក្សា។",
+    attendanceAddedSuccess: "បានកត់ត្រាវត្តមានដោយជោគជ័យ!",
+    attendanceUpdatedSuccess: "បានកែប្រែកំណត់ត្រាវត្តមានដោយជោគជ័យ!",
+    exportAttendanceTitle: "ទាញយករបាយការណ៍វត្តមាន",
+    viewModeCards: "ទិដ្ឋភាពកាត",
+    viewModeTable: "ទិដ្ឋភាពតារាង",
+    viewModeWeekly: "កាលវិភាគប្រចាំសប្តាហ៍",
+    totalSessionsCount: "ម៉ោងរៀនសរុប",
+    presentSessionsCount: "វត្តមានពេញលេញ",
+    lateSessionsCount: "មកយឺត",
+    absentSessionsCount: "អវត្តមាន",
+    excusedSessionsCount: "មានច្បាប់អនុញ្ញាត",
+    dayRequirementNotice: "កាលវិភាគសិក្សា៖ ពីថ្ងៃច័ន្ទ ដល់ ថ្ងៃសៅរ៍ (មិនរាប់បញ្ចូលថ្ងៃអាទិត្យ)។",
+
     // Modals & Confirmations
     confirmDeleteTitle: "បញ្ជាក់ការលុបទិន្នន័យ",
     confirmDeleteMessage: "តើអ្នកប្រាកដជាចង់លុបទិន្នន័យនេះមែនទេ? សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។",
@@ -439,6 +581,8 @@ export const translations = {
     placeholderPracticeTitle: "ឧ. អនុវត្ត React Redux Toolkit",
     placeholderAssignmentTitle: "ឧ. គម្រោងស្រាវជ្រាវបញ្ចប់វគ្គ",
     placeholderDesc: "បញ្ជាក់ការណែនាំ តម្រូវការ ឬកំណត់សម្គាល់ការសិក្សា...",
+    placeholderAttendanceRemarks: "ឧ. បានចូលរៀនគ្រប់ម៉ោង និងបំពេញកិច្ចការអនុវត្តទាន់ពេល...",
+    placeholderSlotNotes: "ឧ. បន្ទប់ 302, Lab 3, លំហាត់ជំពូកទី ៤...",
 
     // First Login & User Profile Management
     firstLoginTitle: "សូមស្វាគមន៍មកកាន់ SETEC StudyTrack!",

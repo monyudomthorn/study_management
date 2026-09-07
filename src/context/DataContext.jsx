@@ -3,13 +3,18 @@ import {
   INITIAL_SUBJECTS,
   INITIAL_TEACHERS,
   INITIAL_PRACTICES,
-  INITIAL_ASSIGNMENTS
+  INITIAL_ASSIGNMENTS,
+  INITIAL_ATTENDANCES
 } from '../data/initialData';
 import {
   loadFromStorage,
   saveToStorage,
   STORAGE_KEYS
 } from '../utils/localStorage';
+import {
+  formatDateDDMMMMYYYY,
+  getDayOfWeek
+} from '../utils/dateUtils';
 
 const DataContext = createContext();
 
@@ -38,6 +43,12 @@ export const DataProvider = ({ children }) => {
     return stored !== null ? stored : INITIAL_ASSIGNMENTS;
   });
 
+  // 5. Attendance State
+  const [attendances, setAttendances] = useState(() => {
+    const stored = loadFromStorage(STORAGE_KEYS.ATTENDANCE, null);
+    return stored !== null ? stored : INITIAL_ATTENDANCES;
+  });
+
   const [isLoading, setIsLoading] = useState(false);
 
   // Sync state changes with localStorage
@@ -57,6 +68,10 @@ export const DataProvider = ({ children }) => {
     saveToStorage(STORAGE_KEYS.ASSIGNMENTS, assignments);
   }, [assignments]);
 
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.ATTENDANCE, attendances);
+  }, [attendances]);
+
   // Refresh / Reload from localStorage
   const fetchAllData = () => {
     setIsLoading(true);
@@ -64,6 +79,7 @@ export const DataProvider = ({ children }) => {
     setTeachers(loadFromStorage(STORAGE_KEYS.TEACHERS, INITIAL_TEACHERS));
     setPractices(loadFromStorage(STORAGE_KEYS.PRACTICES, INITIAL_PRACTICES));
     setAssignments(loadFromStorage(STORAGE_KEYS.ASSIGNMENTS, INITIAL_ASSIGNMENTS));
+    setAttendances(loadFromStorage(STORAGE_KEYS.ATTENDANCE, INITIAL_ATTENDANCES));
     setIsLoading(false);
   };
 
@@ -257,6 +273,168 @@ export const DataProvider = ({ children }) => {
   };
 
   // ==========================================
+  // ATTENDANCE CRUD & OPERATIONS
+  // ==========================================
+  const addAttendance = (newRecord) => {
+    const isoDate = newRecord.date || new Date().toISOString().split('T')[0];
+    const formattedDate = newRecord.formattedDate || formatDateDDMMMMYYYY(isoDate);
+    const day = newRecord.day || getDayOfWeek(isoDate);
+
+    // Build the 3 mandatory slots (7:00-8:30, 8:45-10:15, 10:15-11:45)
+    const slots = Array.isArray(newRecord.slots) && newRecord.slots.length === 3
+      ? newRecord.slots
+      : [
+          {
+            slotId: 'slot-1',
+            time: '7:00 – 8:30',
+            subject: newRecord.slot1Subject || '',
+            status: newRecord.slot1Status || 'Present',
+            room: newRecord.slot1Room || '',
+            teacher: newRecord.slot1Teacher || '',
+            notes: newRecord.slot1Notes || ''
+          },
+          {
+            slotId: 'slot-2',
+            time: '8:45 – 10:15',
+            subject: newRecord.slot2Subject || '',
+            status: newRecord.slot2Status || 'Present',
+            room: newRecord.slot2Room || '',
+            teacher: newRecord.slot2Teacher || '',
+            notes: newRecord.slot2Notes || ''
+          },
+          {
+            slotId: 'slot-3',
+            time: '10:15 – 11:45',
+            subject: newRecord.slot3Subject || '',
+            status: newRecord.slot3Status || 'Present',
+            room: newRecord.slot3Room || '',
+            teacher: newRecord.slot3Teacher || '',
+            notes: newRecord.slot3Notes || ''
+          }
+        ];
+
+    // Calculate overall attendance status
+    const nonFreeSlots = slots.filter(s => s.status !== 'No Class');
+    let overallStatus = 'Present';
+    if (nonFreeSlots.length > 0) {
+      if (nonFreeSlots.every(s => s.status === 'Present')) {
+        overallStatus = 'Present';
+      } else if (nonFreeSlots.every(s => s.status === 'Absent')) {
+        overallStatus = 'Absent';
+      } else if (nonFreeSlots.some(s => s.status === 'Absent')) {
+        overallStatus = 'Partial';
+      } else if (nonFreeSlots.some(s => s.status === 'Late')) {
+        overallStatus = 'Late';
+      } else if (nonFreeSlots.some(s => s.status === 'Excused')) {
+        overallStatus = 'Excused';
+      }
+    }
+
+    const newItem = {
+      id: Date.now(),
+      date: isoDate,
+      formattedDate,
+      day,
+      slots,
+      overallStatus: newRecord.overallStatus || overallStatus,
+      remarks: newRecord.remarks || ''
+    };
+
+    setAttendances((prev) => [newItem, ...prev]);
+    return newItem;
+  };
+
+  const updateAttendance = (id, updatedRecord) => {
+    setAttendances((prev) =>
+      prev.map((item) => {
+        if (item.id === id) {
+          const isoDate = updatedRecord.date || item.date;
+          const formattedDate = updatedRecord.formattedDate || formatDateDDMMMMYYYY(isoDate);
+          const day = updatedRecord.day || getDayOfWeek(isoDate);
+
+          const slots = Array.isArray(updatedRecord.slots) ? updatedRecord.slots : item.slots;
+
+          const nonFreeSlots = slots.filter(s => s.status !== 'No Class');
+          let overallStatus = updatedRecord.overallStatus || item.overallStatus || 'Present';
+          if (!updatedRecord.overallStatus && nonFreeSlots.length > 0) {
+            if (nonFreeSlots.every(s => s.status === 'Present')) {
+              overallStatus = 'Present';
+            } else if (nonFreeSlots.every(s => s.status === 'Absent')) {
+              overallStatus = 'Absent';
+            } else if (nonFreeSlots.some(s => s.status === 'Absent')) {
+              overallStatus = 'Partial';
+            } else if (nonFreeSlots.some(s => s.status === 'Late')) {
+              overallStatus = 'Late';
+            } else if (nonFreeSlots.some(s => s.status === 'Excused')) {
+              overallStatus = 'Excused';
+            }
+          }
+
+          return {
+            ...item,
+            ...updatedRecord,
+            date: isoDate,
+            formattedDate,
+            day,
+            slots,
+            overallStatus
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  const deleteAttendance = (id) => {
+    setAttendances((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const getAttendanceStats = () => {
+    if (attendances.length === 0) {
+      return {
+        rate: 100,
+        totalDays: 0,
+        totalSlots: 0,
+        presentCount: 0,
+        lateCount: 0,
+        absentCount: 0,
+        excusedCount: 0
+      };
+    }
+
+    let totalSlots = 0;
+    let presentCount = 0;
+    let lateCount = 0;
+    let absentCount = 0;
+    let excusedCount = 0;
+
+    attendances.forEach((att) => {
+      (att.slots || []).forEach((slot) => {
+        if (slot.status !== 'No Class') {
+          totalSlots++;
+          if (slot.status === 'Present') presentCount++;
+          else if (slot.status === 'Late') lateCount++;
+          else if (slot.status === 'Absent') absentCount++;
+          else if (slot.status === 'Excused') excusedCount++;
+        }
+      });
+    });
+
+    const effectiveScore = presentCount + (lateCount * 0.75) + (excusedCount * 0.9);
+    const rate = totalSlots > 0 ? Math.round((effectiveScore / totalSlots) * 100) : 100;
+
+    return {
+      rate: Math.min(100, Math.max(0, rate)),
+      totalDays: attendances.length,
+      totalSlots,
+      presentCount,
+      lateCount,
+      absentCount,
+      excusedCount
+    };
+  };
+
+  // ==========================================
   // RESET TO DEFAULT DATA
   // ==========================================
   const resetToDefaultData = () => {
@@ -264,10 +442,12 @@ export const DataProvider = ({ children }) => {
     setTeachers(INITIAL_TEACHERS);
     setPractices(INITIAL_PRACTICES);
     setAssignments(INITIAL_ASSIGNMENTS);
+    setAttendances(INITIAL_ATTENDANCES);
     saveToStorage(STORAGE_KEYS.SUBJECTS, INITIAL_SUBJECTS);
     saveToStorage(STORAGE_KEYS.TEACHERS, INITIAL_TEACHERS);
     saveToStorage(STORAGE_KEYS.PRACTICES, INITIAL_PRACTICES);
     saveToStorage(STORAGE_KEYS.ASSIGNMENTS, INITIAL_ASSIGNMENTS);
+    saveToStorage(STORAGE_KEYS.ATTENDANCE, INITIAL_ATTENDANCES);
   };
 
   // ==========================================
@@ -279,6 +459,7 @@ export const DataProvider = ({ children }) => {
       teachers,
       practices,
       assignments,
+      attendances,
       exportedAt: new Date().toISOString()
     };
     const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data, null, 2))}`;
@@ -328,6 +509,7 @@ export const DataProvider = ({ children }) => {
         teachers,
         practices,
         assignments,
+        attendances,
         isLoading,
         isBackendConnected: false,
         // Refetch
@@ -352,6 +534,11 @@ export const DataProvider = ({ children }) => {
         updateAssignment,
         deleteAssignment,
         toggleAssignmentComplete,
+        // Attendance Operations
+        addAttendance,
+        updateAttendance,
+        deleteAttendance,
+        getAttendanceStats,
         // Utility
         resetToDefaultData,
         exportDataAsJSON,
@@ -370,4 +557,3 @@ export const useData = () => {
   }
   return context;
 };
-
