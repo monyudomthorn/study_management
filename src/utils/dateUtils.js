@@ -209,3 +209,89 @@ export const formatKhmerDate = (formattedDate) => {
 
   return `${day}-${khMonth}-${year}`;
 };
+
+export const SEMESTER_START_DATE = '2026-08-31'; // Monday of Week 1
+export const TOTAL_SEMESTER_WEEKS = 16;
+
+/**
+ * Standard Weekly Timetable Template (Monday to Saturday)
+ */
+export const WEEKLY_TIMETABLE_TEMPLATE = {
+  Monday: [
+    { slotId: 'slot-1', time: '7:00 – 8:30', subject: 'Computer Accounting', room: 'Room 302', teacher: 'PHON Phanith', notes: '' },
+    { slotId: 'slot-2', time: '8:45 – 10:15', subject: 'C# Programming II', room: 'Lab 3', teacher: 'HENG Monorom', notes: '' },
+    { slotId: 'slot-3', time: '10:15 – 11:45', subject: 'C# Programming II', room: 'Lab 3', teacher: 'HENG Monorom', notes: '' }
+  ],
+  Tuesday: [
+    { slotId: 'slot-1', time: '7:00 – 8:30', subject: 'Graphic Design III', room: 'Lab 1', teacher: 'ROM', notes: '' },
+    { slotId: 'slot-2', time: '8:45 – 10:15', subject: 'Studio Photography I', room: 'Studio 2', teacher: 'SOKHA', notes: '' },
+    { slotId: 'slot-3', time: '10:15 – 11:45', subject: 'Database Server Application I', room: 'Lab 3', teacher: 'PHON Phanith', notes: '' }
+  ],
+  Wednesday: [
+    { slotId: 'slot-1', time: '7:00 – 8:30', subject: 'UX/UI', room: 'Lab 2', teacher: 'DARA', notes: '' },
+    { slotId: 'slot-2', time: '8:45 – 10:15', subject: 'Networking I', room: 'Lab 4', teacher: 'VIBOL', notes: '' },
+    { slotId: 'slot-3', time: '10:15 – 11:45', subject: 'Studio Photography I', room: 'Studio 2', teacher: 'SOKHA', notes: '' }
+  ],
+  Thursday: [
+    { slotId: 'slot-1', time: '7:00 – 8:30', subject: 'Data Modeling', room: 'Room 302', teacher: 'PHON Phanith', notes: '' },
+    { slotId: 'slot-2', time: '8:45 – 10:15', subject: 'Computer Accounting', room: 'Room 302', teacher: 'PHON Phanith', notes: '' },
+    { slotId: 'slot-3', time: '10:15 – 11:45', subject: 'UX/UI', room: 'Lab 2', teacher: 'DARA', notes: '' }
+  ],
+  Friday: [
+    { slotId: 'slot-1', time: '7:00 – 8:30', subject: 'Web Development II', room: 'Lab 3', teacher: 'HENG Monorom', notes: '' },
+    { slotId: 'slot-2', time: '8:45 – 10:15', subject: 'Networking I', room: 'Lab 4', teacher: 'VIBOL', notes: '' },
+    { slotId: 'slot-3', time: '10:15 – 11:45', subject: 'Data Modeling', room: 'Room 302', teacher: 'PHON Phanith', notes: '' }
+  ],
+  Saturday: [
+    { slotId: 'slot-1', time: '7:00 – 8:30', subject: 'Graphic Design III', room: 'Lab 1', teacher: 'ROM', notes: '' },
+    { slotId: 'slot-2', time: '8:45 – 10:15', subject: 'Web Development II', room: 'Lab 3', teacher: 'HENG Monorom', notes: '' },
+    { slotId: 'slot-3', time: '10:15 – 11:45', subject: 'Database Server Application I', room: 'Lab 3', teacher: 'PHON Phanith', notes: '' }
+  ]
+};
+
+/**
+ * Get all 6 academic days (Mon-Sat) for a given week number (1..16)
+ * @param {number} weekNum
+ * @returns {Array} List of 6 days with date, formattedDate, day, and defaultSlots
+ */
+export const getWeekDates = (weekNum = 1) => {
+  const safeWeek = Math.max(1, parseInt(weekNum, 10) || 1);
+  const baseStart = new Date(2026, 7, 31); // 2026-08-31
+  const mondayOffset = (safeWeek - 1) * 7;
+  const monday = new Date(baseStart.getFullYear(), baseStart.getMonth(), baseStart.getDate() + mondayOffset);
+
+  const daysList = [];
+  const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const dateNum = String(d.getDate()).padStart(2, '0');
+    const isoDate = `${year}-${month}-${dateNum}`;
+    const dayName = dayNames[i];
+
+    const defaultSlots = (WEEKLY_TIMETABLE_TEMPLATE[dayName] || []).map(s => ({ ...s }));
+
+    daysList.push({
+      date: isoDate,
+      formattedDate: formatDateDDMMMMYYYY(isoDate),
+      day: dayName,
+      defaultSlots
+    });
+  }
+
+  return daysList;
+};
+
+/**
+ * Get date range text for a week (e.g. "31-August-2026 – 05-September-2026")
+ */
+export const getWeekRangeText = (weekNum = 1) => {
+  const days = getWeekDates(weekNum);
+  if (days.length === 0) return '';
+  const first = days[0].formattedDate;
+  const last = days[days.length - 1].formattedDate;
+  return `${first} – ${last}`;
+};
+

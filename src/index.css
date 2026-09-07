@@ -3393,6 +3393,294 @@ select:-webkit-autofill:focus {
   gap: 4px;
 }
 
+/* ====================================================
+   WEEK SELECTOR & NAVIGATION
+   ==================================================== */
+.week-selector-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  border-radius: var(--radius-lg);
+  padding: 18px 22px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.week-selector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.week-header-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.week-badge-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.week-badge-title i {
+  color: var(--primary-light);
+  font-size: 1.25rem;
+}
+
+.week-date-range-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.28);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.week-header-status-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.week-completion-pill .pill-complete {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.16);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.week-completion-pill .pill-pending {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.32);
+  color: #fbbf24;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.btn-mark-week-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: #021a11;
+  font-weight: 800;
+  font-size: 0.82rem;
+  border: none;
+  padding: 7px 16px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.4);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-mark-week-action:hover {
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.55);
+  transform: translateY(-1px);
+}
+
+.btn-mark-week-action:active {
+  transform: translateY(0);
+}
+
+/* Week Navigation Carousel Track */
+.week-nav-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.week-nav-arrow {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.week-nav-arrow:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.22);
+  border-color: var(--primary);
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+.week-nav-arrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.week-pills-scroll-track {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 4px 2px;
+  flex: 1;
+}
+
+.week-pills-scroll-track::-webkit-scrollbar {
+  height: 4px;
+}
+.week-pills-scroll-track::-webkit-scrollbar-track {
+  background: transparent;
+}
+.week-pills-scroll-track::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.2);
+  border-radius: 4px;
+}
+
+.week-pill-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+  padding: 7px 15px;
+  border-radius: var(--radius-full);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.week-pill-tab:hover {
+  background: rgba(16, 185, 129, 0.14);
+  color: #ffffff;
+  border-color: rgba(16, 185, 129, 0.32);
+}
+
+.week-pill-tab.active {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: #021a11;
+  font-weight: 800;
+  border-color: var(--primary-light);
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.45);
+}
+
+.week-pill-tab.is-complete:not(.active) {
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #d1fae5;
+}
+
+.week-tab-label {
+  display: inline-block;
+}
+
+.week-tab-indicator {
+  font-size: 0.72rem;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.week-pill-tab.active .week-tab-indicator {
+  background: rgba(2, 26, 17, 0.35);
+  color: #021a11;
+}
+
+.week-pill-tab:not(.active) .dot-complete {
+  background: rgba(16, 185, 129, 0.25);
+  color: #34d399;
+}
+
+.week-pill-tab:not(.active) .dot-pending {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+}
+
+.week-pill-tab:not(.active) .dot-neutral {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+}
+
+/* Unmarked status indicator in table & card */
+.unmarked-slot-pill {
+  display: inline-block;
+  color: rgba(255, 255, 255, 0.35);
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding-left: 2px;
+}
+
+.btn-mark-day-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.16);
+  border: 1px solid rgba(16, 185, 129, 0.38);
+  color: var(--primary-light);
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-mark-day-action:hover {
+  background: var(--primary);
+  color: #021a11;
+  border-color: var(--primary);
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.4);
+  transform: translateY(-1px);
+}
+
+.attendance-row-unmarked {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.attendance-row-unmarked:hover {
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.card-unmarked-record {
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+
 
 
 

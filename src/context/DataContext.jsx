@@ -385,6 +385,57 @@ export const DataProvider = ({ children }) => {
     );
   };
 
+  const batchAddAttendances = (recordsList) => {
+    if (!Array.isArray(recordsList) || recordsList.length === 0) return;
+
+    setAttendances((prev) => {
+      let current = [...prev];
+      recordsList.forEach((rec, idx) => {
+        const isoDate = rec.date || new Date().toISOString().split('T')[0];
+        const formattedDate = rec.formattedDate || formatDateDDMMMMYYYY(isoDate);
+        const day = rec.day || getDayOfWeek(isoDate);
+        const slots = Array.isArray(rec.slots) ? rec.slots : [];
+
+        const nonFreeSlots = slots.filter(s => s.status !== 'No Class');
+        let overallStatus = rec.overallStatus || 'Present';
+        if (!rec.overallStatus && nonFreeSlots.length > 0) {
+          if (nonFreeSlots.every(s => s.status === 'Present')) {
+            overallStatus = 'Present';
+          } else if (nonFreeSlots.every(s => s.status === 'Absent')) {
+            overallStatus = 'Absent';
+          } else if (nonFreeSlots.some(s => s.status === 'Absent')) {
+            overallStatus = 'Partial';
+          } else if (nonFreeSlots.some(s => s.status === 'Late')) {
+            overallStatus = 'Late';
+          } else if (nonFreeSlots.some(s => s.status === 'Excused')) {
+            overallStatus = 'Excused';
+          }
+        }
+
+        const newItem = {
+          id: Date.now() + idx + Math.floor(Math.random() * 1000),
+          date: isoDate,
+          formattedDate,
+          day,
+          slots,
+          overallStatus,
+          remarks: rec.remarks || ''
+        };
+
+        const existingIdx = current.findIndex(
+          (a) => a.date === isoDate || (a.formattedDate && a.formattedDate === formattedDate)
+        );
+
+        if (existingIdx !== -1) {
+          current[existingIdx] = { ...current[existingIdx], ...newItem, id: current[existingIdx].id };
+        } else {
+          current = [newItem, ...current];
+        }
+      });
+      return current;
+    });
+  };
+
   const deleteAttendance = (id) => {
     setAttendances((prev) => prev.filter((item) => item.id !== id));
   };
@@ -536,6 +587,7 @@ export const DataProvider = ({ children }) => {
         toggleAssignmentComplete,
         // Attendance Operations
         addAttendance,
+        batchAddAttendances,
         updateAttendance,
         deleteAttendance,
         getAttendanceStats,

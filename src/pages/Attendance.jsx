@@ -15,7 +15,11 @@ import {
   DAY_NAMES_MAP,
   ATTENDANCE_TIME_SLOTS,
   ATTENDANCE_STATUSES,
-  getTodayAcademicInfo
+  getTodayAcademicInfo,
+  getWeekDates,
+  getWeekRangeText,
+  TOTAL_SEMESTER_WEEKS,
+  WEEKLY_TIMETABLE_TEMPLATE
 } from '../utils/dateUtils';
 
 export const Attendance = () => {
@@ -24,6 +28,7 @@ export const Attendance = () => {
     subjects,
     teachers,
     addAttendance,
+    batchAddAttendances,
     updateAttendance,
     deleteAttendance,
     getAttendanceStats
@@ -32,12 +37,15 @@ export const Attendance = () => {
   const { t, lang } = useLanguage();
   const { addToast } = useToast();
 
+  // Week Navigation State: 1..16 or 'All'
+  const [selectedWeek, setSelectedWeek] = useState(1);
+
   // Search & Filter state
   const [searchTerm, setSearchTerm] = useState('');
   const [dayFilter, setDayFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
   const [subjectFilter, setSubjectFilter] = useState('All');
-  const [viewMode, setViewMode] = useState('cards'); // 'cards' | 'table' | 'weekly'
+  const [viewMode, setViewMode] = useState('table'); // Default to table matching user screenshot
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -79,160 +87,99 @@ export const Attendance = () => {
     }
   ]);
 
-  // Statistics
+  // Overall Statistics
   const stats = getAttendanceStats();
 
-  // Handle Date Input Change in Modal
-  const handleDateChange = (newDateStr) => {
-    setFormDate(newDateStr);
-    if (!newDateStr) {
-      setFormDay('');
-      setFormFormattedDate('');
-      return;
+  // Week Completion Helper
+  const getWeekCompletion = (w) => {
+    if (w === 'All') {
+      return { markedCount: attendances.length, total: attendances.length, isComplete: false };
     }
-
-    const dayName = getDayOfWeek(newDateStr);
-    const formatted = formatDateDDMMMMYYYY(newDateStr);
-    setFormDay(dayName);
-    setFormFormattedDate(formatted);
-  };
-
-  const isFormDateValid = useMemo(() => {
-    if (!formDate) return false;
-    return isAllowedDay(formDate);
-  }, [formDate]);
-
-  const isFormSunday = useMemo(() => {
-    if (!formDate) return false;
-    return getDayOfWeek(formDate) === 'Sunday';
-  }, [formDate]);
-
-  // Open Add Modal
-  const handleOpenAddModal = () => {
-    setEditingAttendance(null);
-    const todayInfo = getTodayAcademicInfo();
-    setFormDate(todayInfo.isoDate);
-    setFormDay(todayInfo.day);
-    setFormFormattedDate(todayInfo.formattedDate);
-    setFormRemarks('');
-
-    setFormSlots([
-      {
-        slotId: 'slot-1',
-        time: '7:00 – 8:30',
-        subject: '',
-        status: 'Present',
-        room: '',
-        teacher: '',
-        notes: ''
-      },
-      {
-        slotId: 'slot-2',
-        time: '8:45 – 10:15',
-        subject: '',
-        status: 'Present',
-        room: '',
-        teacher: '',
-        notes: ''
-      },
-      {
-        slotId: 'slot-3',
-        time: '10:15 – 11:45',
-        subject: '',
-        status: 'Present',
-        room: '',
-        teacher: '',
-        notes: ''
-      }
-    ]);
-    setIsModalOpen(true);
-  };
-
-  // Open Edit Modal
-  const handleOpenEditModal = (record) => {
-    setEditingAttendance(record);
-    setFormDate(record.date);
-    setFormDay(record.day);
-    setFormFormattedDate(record.formattedDate || formatDateDDMMMMYYYY(record.date));
-    setFormRemarks(record.remarks || '');
-    setFormSlots(
-      record.slots && record.slots.length === 3
-        ? record.slots.map(s => ({ ...s }))
-        : [
-            { slotId: 'slot-1', time: '7:00 – 8:30', subject: '', status: 'Present', room: '', teacher: '', notes: '' },
-            { slotId: 'slot-2', time: '8:45 – 10:15', subject: '', status: 'Present', room: '', teacher: '', notes: '' },
-            { slotId: 'slot-3', time: '10:15 – 11:45', subject: '', status: 'Present', room: '', teacher: '', notes: '' }
-          ]
-    );
-    setIsModalOpen(true);
-  };
-
-  // Quick action: Mark all slots present
-  const handleMarkAllPresent = () => {
-    setFormSlots(prev => prev.map(s => ({ ...s, status: 'Present' })));
-    addToast(t('markAllPresent'), 'info');
-  };
-
-  // Slot field update
-  const handleSlotChange = (index, field, value) => {
-    setFormSlots(prev => {
-      const updated = [...prev];
-      updated[index] = { ...updated[index], [field]: value };
-      return updated;
-    });
-  };
-
-  // Submit Modal
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-
-    if (!formDate) {
-      addToast(t('errorInvalidDate'), 'error');
-      return;
-    }
-
-    if (!isAllowedDay(formDate)) {
-      addToast(t('errorSundayNotAllowed'), 'error');
-      return;
-    }
-
-    const hasAnySubject = formSlots.some(s => s.subject && s.subject.trim() !== '');
-    if (!hasAnySubject) {
-      addToast(t('errorSlotSubjects'), 'warning');
-      return;
-    }
-
-    const recordData = {
-      date: formDate,
-      formattedDate: formFormattedDate || formatDateDDMMMMYYYY(formDate),
-      day: formDay || getDayOfWeek(formDate),
-      slots: formSlots,
-      remarks: formRemarks
+    const weekDays = getWeekDates(w);
+    const markedCount = weekDays.filter((dayObj) =>
+      attendances.some(
+        (a) => a.date === dayObj.date || a.formattedDate === dayObj.formattedDate
+      )
+    ).length;
+    return {
+      markedCount,
+      total: weekDays.length,
+      isComplete: markedCount === weekDays.length && weekDays.length > 0
     };
-
-    if (editingAttendance) {
-      updateAttendance(editingAttendance.id, recordData);
-      addToast(t('attendanceUpdatedSuccess'), 'success');
-    } else {
-      addAttendance(recordData);
-      addToast(t('attendanceAddedSuccess'), 'success');
-    }
-
-    setIsModalOpen(false);
   };
 
-  // Confirm Delete
-  const handleConfirmDelete = () => {
-    if (deleteTarget) {
-      deleteAttendance(deleteTarget.id);
-      addToast(t('itemDeletedSuccess'), 'success');
-      setDeleteTarget(null);
+  const currentWeekRange = useMemo(() => {
+    if (selectedWeek === 'All') return '';
+    return getWeekRangeText(selectedWeek);
+  }, [selectedWeek]);
+
+  const currentWeekCompletion = useMemo(() => {
+    return getWeekCompletion(selectedWeek);
+  }, [selectedWeek, attendances]);
+
+  // Week navigation arrows
+  const handlePrevWeek = () => {
+    if (selectedWeek === 'All') {
+      setSelectedWeek(1);
+      return;
+    }
+    if (selectedWeek > 1) {
+      setSelectedWeek(selectedWeek - 1);
     }
   };
+
+  const handleNextWeek = () => {
+    if (selectedWeek === 'All') {
+      setSelectedWeek(1);
+      return;
+    }
+    if (selectedWeek < TOTAL_SEMESTER_WEEKS) {
+      setSelectedWeek(selectedWeek + 1);
+    }
+  };
+
+  // Generate Raw Records for Active View (Week or All)
+  const rawRecordsForView = useMemo(() => {
+    if (selectedWeek === 'All') {
+      return [...attendances].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    }
+
+    const weekDays = getWeekDates(selectedWeek);
+    // Reverse so Saturday is on top and Monday is at bottom (matches user screenshot!)
+    const reversedDays = [...weekDays].reverse();
+
+    return reversedDays.map((dayObj) => {
+      const found = attendances.find(
+        (a) => a.date === dayObj.date || a.formattedDate === dayObj.formattedDate
+      );
+
+      if (found) {
+        return {
+          ...found,
+          isUnmarked: false
+        };
+      }
+
+      // Unmarked record with standard timetable schedule
+      return {
+        id: `unmarked-${dayObj.date}`,
+        date: dayObj.date,
+        formattedDate: dayObj.formattedDate,
+        day: dayObj.day,
+        slots: dayObj.defaultSlots.map((s) => ({
+          ...s,
+          status: null
+        })),
+        overallStatus: null,
+        remarks: '',
+        isUnmarked: true
+      };
+    });
+  }, [selectedWeek, attendances]);
 
   // Filter records
   const filteredAttendances = useMemo(() => {
-    return attendances.filter((att) => {
+    return rawRecordsForView.filter((att) => {
       const formattedDate = att.formattedDate || formatDateDDMMMMYYYY(att.date);
       const query = searchTerm.toLowerCase();
 
@@ -254,8 +201,9 @@ export const Attendance = () => {
 
       const matchStatus =
         statusFilter === 'All' ||
-        att.overallStatus === statusFilter ||
-        (att.slots && att.slots.some((s) => s.status === statusFilter));
+        (!att.isUnmarked && att.overallStatus === statusFilter) ||
+        (!att.isUnmarked && att.slots && att.slots.some((s) => s.status === statusFilter)) ||
+        (att.isUnmarked && statusFilter === 'Not Marked');
 
       const matchSubject =
         subjectFilter === 'All' ||
@@ -263,7 +211,212 @@ export const Attendance = () => {
 
       return matchSearch && matchDay && matchStatus && matchSubject;
     });
-  }, [attendances, searchTerm, dayFilter, statusFilter, subjectFilter]);
+  }, [rawRecordsForView, searchTerm, dayFilter, statusFilter, subjectFilter]);
+
+  // Handle Date Input Change in Modal
+  const handleDateChange = (newDateStr) => {
+    setFormDate(newDateStr);
+    if (!newDateStr) {
+      setFormDay('');
+      setFormFormattedDate('');
+      return;
+    }
+
+    const dayName = getDayOfWeek(newDateStr);
+    const formatted = formatDateDDMMMMYYYY(newDateStr);
+    setFormDay(dayName);
+    setFormFormattedDate(formatted);
+
+    // If day changed and not editing, prefill template subjects for that day
+    if (!editingAttendance && WEEKLY_TIMETABLE_TEMPLATE[dayName]) {
+      const template = WEEKLY_TIMETABLE_TEMPLATE[dayName];
+      setFormSlots(
+        template.map((s, idx) => ({
+          slotId: s.slotId || `slot-${idx + 1}`,
+          time: s.time || (ATTENDANCE_TIME_SLOTS[idx]?.time || '7:00 – 8:30'),
+          subject: s.subject || '',
+          status: 'Present',
+          room: s.room || '',
+          teacher: s.teacher || '',
+          notes: s.notes || ''
+        }))
+      );
+    }
+  };
+
+  const isFormSunday = useMemo(() => {
+    if (!formDate) return false;
+    return getDayOfWeek(formDate) === 'Sunday';
+  }, [formDate]);
+
+  // Open Add Modal
+  const handleOpenAddModal = () => {
+    setEditingAttendance(null);
+    const todayInfo = getTodayAcademicInfo();
+    const dayName = todayInfo.day;
+    const template = WEEKLY_TIMETABLE_TEMPLATE[dayName] || [];
+
+    setFormDate(todayInfo.isoDate);
+    setFormDay(dayName);
+    setFormFormattedDate(todayInfo.formattedDate);
+    setFormRemarks('');
+
+    setFormSlots(
+      template.length === 3
+        ? template.map((s, idx) => ({
+            slotId: s.slotId || `slot-${idx + 1}`,
+            time: s.time || (ATTENDANCE_TIME_SLOTS[idx]?.time || '7:00 – 8:30'),
+            subject: s.subject || '',
+            status: 'Present',
+            room: s.room || '',
+            teacher: s.teacher || '',
+            notes: s.notes || ''
+          }))
+        : [
+            { slotId: 'slot-1', time: '7:00 – 8:30', subject: '', status: 'Present', room: '', teacher: '', notes: '' },
+            { slotId: 'slot-2', time: '8:45 – 10:15', subject: '', status: 'Present', room: '', teacher: '', notes: '' },
+            { slotId: 'slot-3', time: '10:15 – 11:45', subject: '', status: 'Present', room: '', teacher: '', notes: '' }
+          ]
+    );
+    setIsModalOpen(true);
+  };
+
+  // Open Record / Edit for a Specific Day (e.g. from table or cards)
+  const handleOpenRecordDay = (record) => {
+    const isUnmarked = !!record.isUnmarked;
+    setEditingAttendance(isUnmarked ? null : record);
+    setFormDate(record.date);
+    setFormDay(record.day);
+    setFormFormattedDate(record.formattedDate || formatDateDDMMMMYYYY(record.date));
+    setFormRemarks(record.remarks || '');
+
+    const templateSlots =
+      record.slots && record.slots.length === 3
+        ? record.slots
+        : WEEKLY_TIMETABLE_TEMPLATE[record.day] || [];
+
+    setFormSlots(
+      templateSlots.map((s, idx) => ({
+        slotId: s.slotId || `slot-${idx + 1}`,
+        time: s.time || (ATTENDANCE_TIME_SLOTS[idx]?.time || '7:00 – 8:30'),
+        subject: s.subject || '',
+        status: s.status || 'Present',
+        room: s.room || '',
+        teacher: s.teacher || '',
+        notes: s.notes || ''
+      }))
+    );
+    setIsModalOpen(true);
+  };
+
+  // Open Edit Modal for an already saved record
+  const handleOpenEditModal = (record) => {
+    handleOpenRecordDay(record);
+  };
+
+  // Quick action: Mark all slots present
+  const handleMarkAllPresent = () => {
+    setFormSlots((prev) => prev.map((s) => ({ ...s, status: 'Present' })));
+    addToast(t('markAllPresent'), 'info');
+  };
+
+  // Slot field update
+  const handleSlotChange = (index, field, value) => {
+    setFormSlots((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  };
+
+  // Submit Modal
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+
+    if (!formDate) {
+      addToast(t('errorInvalidDate'), 'error');
+      return;
+    }
+
+    if (!isAllowedDay(formDate)) {
+      addToast(t('errorSundayNotAllowed'), 'error');
+      return;
+    }
+
+    const hasAnySubject = formSlots.some((s) => s.subject && s.subject.trim() !== '');
+    if (!hasAnySubject) {
+      addToast(t('errorSlotSubjects'), 'warning');
+      return;
+    }
+
+    const recordData = {
+      date: formDate,
+      formattedDate: formFormattedDate || formatDateDDMMMMYYYY(formDate),
+      day: formDay || getDayOfWeek(formDate),
+      slots: formSlots,
+      remarks: formRemarks
+    };
+
+    if (editingAttendance && editingAttendance.id && !String(editingAttendance.id).startsWith('unmarked-')) {
+      updateAttendance(editingAttendance.id, recordData);
+      addToast(t('attendanceUpdatedSuccess'), 'success');
+    } else {
+      addAttendance(recordData);
+      addToast(t('attendanceAddedSuccess'), 'success');
+    }
+
+    setIsModalOpen(false);
+  };
+
+  // Bulk Mark Entire Week as Present
+  const handleMarkEntireWeekPresent = () => {
+    if (selectedWeek === 'All') return;
+
+    const weekDays = getWeekDates(selectedWeek);
+    const recordsToSave = weekDays.map((dayObj) => {
+      const existing = attendances.find(
+        (a) => a.date === dayObj.date || a.formattedDate === dayObj.formattedDate
+      );
+      if (existing) {
+        return {
+          ...existing,
+          slots: (existing.slots || []).map((s) => ({
+            ...s,
+            status: s.status || 'Present'
+          })),
+          overallStatus: 'Present'
+        };
+      }
+      return {
+        date: dayObj.date,
+        formattedDate: dayObj.formattedDate,
+        day: dayObj.day,
+        slots: dayObj.defaultSlots.map((s) => ({
+          ...s,
+          status: 'Present'
+        })),
+        overallStatus: 'Present',
+        remarks: ''
+      };
+    });
+
+    batchAddAttendances(recordsToSave);
+    addToast(
+      lang === 'kh'
+        ? `បានកត់ត្រាវត្តមានសម្រាប់សប្ដាហ៍ទី ${selectedWeek} រួចរាល់!`
+        : `Week ${selectedWeek} marked as present successfully!`,
+      'success'
+    );
+  };
+
+  // Confirm Delete
+  const handleConfirmDelete = () => {
+    if (deleteTarget) {
+      deleteAttendance(deleteTarget.id);
+      addToast(t('itemDeletedSuccess'), 'success');
+      setDeleteTarget(null);
+    }
+  };
 
   // Export Attendance report as CSV
   const handleExportCSV = () => {
@@ -273,9 +426,10 @@ export const Attendance = () => {
     }
 
     let csvContent = 'data:text/csv;charset=utf-8,';
-    csvContent += 'Date (DD-MMMM-YYYY),Day,7:00 – 8:30 Subject,Slot 1 Status,8:45 – 10:15 Subject,Slot 2 Status,10:15 – 11:45 Subject,Slot 3 Status,Overall Status,Remarks\n';
+    csvContent +=
+      'Date (DD-MMMM-YYYY),Day,7:00 – 8:30 Subject,Slot 1 Status,8:45 – 10:15 Subject,Slot 2 Status,10:15 – 11:45 Subject,Slot 3 Status,Overall Status,Remarks\n';
 
-    attendances.forEach(a => {
+    attendances.forEach((a) => {
       const s1 = a.slots?.[0] || {};
       const s2 = a.slots?.[1] || {};
       const s3 = a.slots?.[2] || {};
@@ -329,6 +483,14 @@ export const Attendance = () => {
     return dayName;
   };
 
+  const weekTabs = useMemo(() => {
+    const list = [];
+    for (let i = 1; i <= TOTAL_SEMESTER_WEEKS; i++) {
+      list.push(i);
+    }
+    return list;
+  }, []);
+
   return (
     <div className="attendance-page">
       {/* Page Header */}
@@ -359,7 +521,7 @@ export const Attendance = () => {
       </div>
 
       {/* Summary Stat Cards */}
-      <div className="stats-grid" style={{ marginBottom: '28px' }}>
+      <div className="stats-grid" style={{ marginBottom: '24px' }}>
         <StatCard
           title={t('statAttendanceRate')}
           value={`${stats.rate}%`}
@@ -390,8 +552,123 @@ export const Attendance = () => {
         />
       </div>
 
+      {/* ==================================================== */}
+      {/* ACADEMIC WEEK NAVIGATION BAR                         */}
+      {/* ==================================================== */}
+      <div className="week-selector-card" style={{ marginBottom: '22px' }}>
+        {/* Top Header of the Week Card */}
+        <div className="week-selector-header">
+          <div className="week-header-info">
+            <div className="week-badge-title">
+              <i className="ri-calendar-todo-line"></i>
+              <span>
+                {selectedWeek === 'All'
+                  ? t('allWeeks')
+                  : `${lang === 'kh' ? 'សប្ដាហ៍ទី' : 'Week'} ${selectedWeek}`}
+              </span>
+            </div>
+            {selectedWeek !== 'All' && (
+              <span className="week-date-range-text">
+                <i className="ri-time-line"></i> {currentWeekRange}
+              </span>
+            )}
+          </div>
+
+          <div className="week-header-status-actions">
+            {selectedWeek !== 'All' && (
+              <div className="week-completion-pill">
+                {currentWeekCompletion.isComplete ? (
+                  <span className="pill-complete">
+                    <i className="ri-checkbox-circle-fill"></i> {currentWeekCompletion.markedCount}/6 {t('daysMarked')}
+                  </span>
+                ) : (
+                  <span className="pill-pending">
+                    <i className="ri-time-line"></i> {currentWeekCompletion.markedCount}/6 {t('daysMarked')}
+                  </span>
+                )}
+              </div>
+            )}
+
+            {selectedWeek !== 'All' && !currentWeekCompletion.isComplete && (
+              <button
+                type="button"
+                className="btn-mark-week-action"
+                onClick={handleMarkEntireWeekPresent}
+                title="Mark all 6 days in this week as present"
+              >
+                <i className="ri-check-double-line"></i>
+                <span>{t('markAllWeekPresent')}</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Scrollable Week Pills List with Navigation Arrows */}
+        <div className="week-nav-container">
+          <button
+            type="button"
+            className="week-nav-arrow"
+            onClick={handlePrevWeek}
+            disabled={selectedWeek === 1}
+            title="Previous Week"
+          >
+            <i className="ri-arrow-left-s-line"></i>
+          </button>
+
+          <div className="week-pills-scroll-track">
+            {weekTabs.map((w) => {
+              const comp = getWeekCompletion(w);
+              const isActive = selectedWeek === w;
+              return (
+                <button
+                  key={w}
+                  type="button"
+                  className={`week-pill-tab ${isActive ? 'active' : ''} ${comp.isComplete ? 'is-complete' : ''}`}
+                  onClick={() => setSelectedWeek(w)}
+                >
+                  <span className="week-tab-label">
+                    {lang === 'kh' ? `សប្ដាហ៍ ${w}` : `Week ${w}`}
+                  </span>
+                  <span className={`week-tab-indicator ${comp.isComplete ? 'dot-complete' : 'dot-pending'}`}>
+                    {comp.isComplete ? (
+                      <i className="ri-check-line"></i>
+                    ) : (
+                      `${comp.markedCount}/6`
+                    )}
+                  </span>
+                </button>
+              );
+            })}
+
+            <button
+              type="button"
+              className={`week-pill-tab ${selectedWeek === 'All' ? 'active' : ''}`}
+              onClick={() => setSelectedWeek('All')}
+            >
+              <span className="week-tab-label">
+                <i className="ri-list-check" style={{ marginRight: '4px' }}></i>
+                {t('allWeeks')}
+              </span>
+              <span className="week-tab-indicator dot-neutral">
+                {attendances.length}
+              </span>
+            </button>
+          </div>
+
+          <button
+            type="button"
+            className="week-nav-arrow"
+            onClick={handleNextWeek}
+            disabled={selectedWeek === TOTAL_SEMESTER_WEEKS || selectedWeek === 'All'}
+            title="Next Week"
+          >
+            <i className="ri-arrow-right-s-line"></i>
+          </button>
+        </div>
+      </div>
+
       {/* Filter and View Mode Toolbar */}
-      <div className="card toolbar-card" style={{ padding: '16px 20px', marginBottom: '24px' }}>
+      <div className="card toolbar-card" style={{ padding: '16px 20px', marginBottom: '22px' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', alignItems: 'center', justifyContent: 'space-between' }}>
           {/* Search Bar */}
           <div className="search-bar" style={{ minWidth: '260px', flex: 1 }}>
@@ -442,6 +719,7 @@ export const Attendance = () => {
               <option value="Absent">{t('statusAbsent')}</option>
               <option value="Excused">{t('statusExcused')}</option>
               <option value="No Class">{t('statusNoClass')}</option>
+              <option value="Not Marked">{t('notMarked')}</option>
             </select>
 
             {/* Filter by Subject */}
@@ -462,15 +740,6 @@ export const Attendance = () => {
             <div className="view-mode-pill-group">
               <button
                 type="button"
-                className={`view-pill-btn ${viewMode === 'cards' ? 'active' : ''}`}
-                onClick={() => setViewMode('cards')}
-                title={t('viewModeCards')}
-              >
-                <i className="ri-layout-grid-line"></i>
-                <span className="hide-mobile">{t('viewModeCards')}</span>
-              </button>
-              <button
-                type="button"
                 className={`view-pill-btn ${viewMode === 'table' ? 'active' : ''}`}
                 onClick={() => setViewMode('table')}
                 title={t('viewModeTable')}
@@ -478,17 +747,18 @@ export const Attendance = () => {
                 <i className="ri-table-line"></i>
                 <span className="hide-mobile">{t('viewModeTable')}</span>
               </button>
+              <button
+                type="button"
+                className={`view-pill-btn ${viewMode === 'cards' ? 'active' : ''}`}
+                onClick={() => setViewMode('cards')}
+                title={t('viewModeCards')}
+              >
+                <i className="ri-layout-grid-line"></i>
+                <span className="hide-mobile">{t('viewModeCards')}</span>
+              </button>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Notice info banner */}
-      <div className="attendance-info-banner" style={{ marginBottom: '22px' }}>
-        <i className="ri-information-line" style={{ fontSize: '1.2rem', color: 'var(--primary-light)' }}></i>
-        <span>
-          <strong>{t('dayRequirementNotice')}</strong> Standard format: <code>DD-MMMM-YYYY</code> with 3 daily slots: <code>7:00 – 8:30</code>, <code>8:45 – 10:15</code>, and <code>10:15 – 11:45</code>.
-        </span>
       </div>
 
       {/* Main Content Area */}
@@ -511,13 +781,166 @@ export const Attendance = () => {
             </Button>
           </div>
         </div>
-      ) : viewMode === 'cards' ? (
+      ) : viewMode === 'table' ? (
+        /* TABLE VIEW (Standard Academic SETEC Table matching screenshot) */
+        <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
+          <div className="table-responsive">
+            <table className="custom-table attendance-table">
+              <thead>
+                <tr>
+                  <th style={{ minWidth: '170px' }}>
+                    {lang === 'kh' ? 'កាលបរិច្ឆេទ (DD-MMMM-YYYY)' : 'Date (DD-MMMM-YYYY)'}
+                  </th>
+                  <th style={{ minWidth: '120px' }}>
+                    {lang === 'kh' ? 'ថ្ងៃនៃសប្ដាហ៍' : 'Day'}
+                  </th>
+                  <th style={{ minWidth: '190px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontWeight: 700 }}>7:00 – 8:30</span>
+                      <small style={{ color: 'var(--primary-light)', fontWeight: 600, fontSize: '0.74rem' }}>SLOT 1</small>
+                    </div>
+                  </th>
+                  <th style={{ minWidth: '190px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontWeight: 700 }}>8:45 – 10:15</span>
+                      <small style={{ color: 'var(--primary-light)', fontWeight: 600, fontSize: '0.74rem' }}>SLOT 2</small>
+                    </div>
+                  </th>
+                  <th style={{ minWidth: '190px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontWeight: 700 }}>10:15 – 11:45</span>
+                      <small style={{ color: 'var(--primary-light)', fontWeight: 600, fontSize: '0.74rem' }}>SLOT 3</small>
+                    </div>
+                  </th>
+                  <th style={{ minWidth: '130px' }}>
+                    {lang === 'kh' ? 'ស្ថានភាព' : 'Status'}
+                  </th>
+                  <th style={{ textAlign: 'right', minWidth: '130px' }}>
+                    {lang === 'kh' ? 'សកម្មភាព' : 'Action'}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredAttendances.map((att) => {
+                  const s1 = att.slots?.[0] || {};
+                  const s2 = att.slots?.[1] || {};
+                  const s3 = att.slots?.[2] || {};
+                  const formattedDate = att.formattedDate || formatDateDDMMMMYYYY(att.date);
+                  const isUnmarked = !!att.isUnmarked;
+
+                  return (
+                    <tr key={att.id} className={isUnmarked ? 'attendance-row-unmarked' : ''}>
+                      {/* Date */}
+                      <td>
+                        <strong style={{ color: isUnmarked ? '#e2e8f0' : '#ffffff', fontSize: '0.92rem' }}>
+                          {formattedDate}
+                        </strong>
+                      </td>
+
+                      {/* Day */}
+                      <td>
+                        <span className="day-table-pill">{getDayDisplayName(att.day)}</span>
+                      </td>
+
+                      {/* Slot 1 */}
+                      <td>
+                        <div className="table-slot-cell">
+                          <span className="table-subject-title">{s1.subject || '—'}</span>
+                          {isUnmarked || !s1.status ? (
+                            <span className="unmarked-slot-pill">—</span>
+                          ) : (
+                            getStatusBadge(s1.status)
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Slot 2 */}
+                      <td>
+                        <div className="table-slot-cell">
+                          <span className="table-subject-title">{s2.subject || '—'}</span>
+                          {isUnmarked || !s2.status ? (
+                            <span className="unmarked-slot-pill">—</span>
+                          ) : (
+                            getStatusBadge(s2.status)
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Slot 3 */}
+                      <td>
+                        <div className="table-slot-cell">
+                          <span className="table-subject-title">{s3.subject || '—'}</span>
+                          {isUnmarked || !s3.status ? (
+                            <span className="unmarked-slot-pill">—</span>
+                          ) : (
+                            getStatusBadge(s3.status)
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Overall Status */}
+                      <td>
+                        {isUnmarked ? (
+                          <Badge variant="default" icon="ri-time-line">
+                            {t('notMarked')}
+                          </Badge>
+                        ) : (
+                          getStatusBadge(att.overallStatus || 'Present')
+                        )}
+                      </td>
+
+                      {/* Actions */}
+                      <td style={{ textAlign: 'right' }}>
+                        {isUnmarked ? (
+                          <button
+                            type="button"
+                            className="btn-mark-day-action"
+                            onClick={() => handleOpenRecordDay(att)}
+                            title={t('markAttendance')}
+                          >
+                            <i className="ri-checkbox-circle-line"></i>
+                            <span>{t('markAttendance')}</span>
+                          </button>
+                        ) : (
+                          <div style={{ display: 'inline-flex', gap: '6px' }}>
+                            <button
+                              type="button"
+                              className="btn-icon-soft"
+                              onClick={() => handleOpenEditModal(att)}
+                              title={t('edit')}
+                            >
+                              <i className="ri-edit-line"></i>
+                            </button>
+                            <button
+                              type="button"
+                              className="btn-icon-soft btn-icon-danger"
+                              onClick={() => setDeleteTarget(att)}
+                              title={t('delete')}
+                            >
+                              <i className="ri-delete-bin-line"></i>
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : (
         /* CARDS / SCHEDULE VIEW */
         <div className="attendance-cards-list">
           {filteredAttendances.map((att) => {
             const formattedDate = att.formattedDate || formatDateDDMMMMYYYY(att.date);
+            const isUnmarked = !!att.isUnmarked;
+
             return (
-              <div key={att.id} className="card attendance-record-card">
+              <div
+                key={att.id}
+                className={`card attendance-record-card ${isUnmarked ? 'card-unmarked-record' : ''}`}
+              >
                 {/* Record Header */}
                 <div className="attendance-card-header">
                   <div className="attendance-date-badge-group">
@@ -531,21 +954,43 @@ export const Attendance = () => {
                   </div>
 
                   <div className="attendance-card-actions">
-                    {getStatusBadge(att.overallStatus || 'Present')}
-                    <button
-                      className="btn-icon-soft"
-                      onClick={() => handleOpenEditModal(att)}
-                      title={t('edit')}
-                    >
-                      <i className="ri-edit-line"></i>
-                    </button>
-                    <button
-                      className="btn-icon-soft btn-icon-danger"
-                      onClick={() => setDeleteTarget(att)}
-                      title={t('delete')}
-                    >
-                      <i className="ri-delete-bin-line"></i>
-                    </button>
+                    {isUnmarked ? (
+                      <Badge variant="default" icon="ri-time-line">
+                        {t('notMarked')}
+                      </Badge>
+                    ) : (
+                      getStatusBadge(att.overallStatus || 'Present')
+                    )}
+
+                    {isUnmarked ? (
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => handleOpenRecordDay(att)}
+                        icon={<i className="ri-checkbox-circle-line"></i>}
+                      >
+                        {t('markAttendance')}
+                      </Button>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          className="btn-icon-soft"
+                          onClick={() => handleOpenEditModal(att)}
+                          title={t('edit')}
+                        >
+                          <i className="ri-edit-line"></i>
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-icon-soft btn-icon-danger"
+                          onClick={() => setDeleteTarget(att)}
+                          title={t('delete')}
+                        >
+                          <i className="ri-delete-bin-line"></i>
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -560,7 +1005,11 @@ export const Attendance = () => {
                               <i className="ri-time-line"></i> {slot.time}
                             </span>
                             <span className="slot-status-pill">
-                              {getStatusBadge(slot.status)}
+                              {isUnmarked || !slot.status ? (
+                                <span className="unmarked-slot-pill">—</span>
+                              ) : (
+                                getStatusBadge(slot.status)
+                              )}
                             </span>
                           </div>
                           <div className="slot-subject-name">
@@ -604,115 +1053,16 @@ export const Attendance = () => {
             );
           })}
         </div>
-      ) : (
-        /* TABLE VIEW */
-        <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
-          <div className="table-responsive">
-            <table className="custom-table attendance-table">
-              <thead>
-                <tr>
-                  <th>{t('colDate')}</th>
-                  <th>{t('colDay')}</th>
-                  <th>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span>7:00 – 8:30</span>
-                      <small style={{ color: 'var(--primary-light)', fontWeight: 400 }}>Slot 1</small>
-                    </div>
-                  </th>
-                  <th>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span>8:45 – 10:15</span>
-                      <small style={{ color: 'var(--primary-light)', fontWeight: 400 }}>Slot 2</small>
-                    </div>
-                  </th>
-                  <th>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span>10:15 – 11:45</span>
-                      <small style={{ color: 'var(--primary-light)', fontWeight: 400 }}>Slot 3</small>
-                    </div>
-                  </th>
-                  <th>{t('colStatus')}</th>
-                  <th style={{ textAlign: 'right' }}>{t('colAction')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredAttendances.map((att) => {
-                  const s1 = att.slots?.[0] || {};
-                  const s2 = att.slots?.[1] || {};
-                  const s3 = att.slots?.[2] || {};
-                  const formattedDate = att.formattedDate || formatDateDDMMMMYYYY(att.date);
-
-                  return (
-                    <tr key={att.id}>
-                      {/* Date */}
-                      <td>
-                        <strong style={{ color: '#ffffff' }}>{formattedDate}</strong>
-                      </td>
-                      {/* Day */}
-                      <td>
-                        <span className="day-table-pill">{getDayDisplayName(att.day)}</span>
-                      </td>
-                      {/* Slot 1 */}
-                      <td>
-                        <div className="table-slot-cell">
-                          <span className="table-subject-title">{s1.subject || '—'}</span>
-                          {getStatusBadge(s1.status)}
-                        </div>
-                      </td>
-                      {/* Slot 2 */}
-                      <td>
-                        <div className="table-slot-cell">
-                          <span className="table-subject-title">{s2.subject || '—'}</span>
-                          {getStatusBadge(s2.status)}
-                        </div>
-                      </td>
-                      {/* Slot 3 */}
-                      <td>
-                        <div className="table-slot-cell">
-                          <span className="table-subject-title">{s3.subject || '—'}</span>
-                          {getStatusBadge(s3.status)}
-                        </div>
-                      </td>
-                      {/* Overall Status */}
-                      <td>
-                        {getStatusBadge(att.overallStatus || 'Present')}
-                      </td>
-                      {/* Actions */}
-                      <td style={{ textAlign: 'right' }}>
-                        <div style={{ display: 'inline-flex', gap: '6px' }}>
-                          <button
-                            className="btn-icon-soft"
-                            onClick={() => handleOpenEditModal(att)}
-                            title={t('edit')}
-                          >
-                            <i className="ri-edit-line"></i>
-                          </button>
-                          <button
-                            className="btn-icon-soft btn-icon-danger"
-                            onClick={() => setDeleteTarget(att)}
-                            title={t('delete')}
-                          >
-                            <i className="ri-delete-bin-line"></i>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
       )}
 
       {/* ========================================== */}
-      {/* RECORD / EDIT ATTENDANCE MODAL */}
+      {/* RECORD / EDIT ATTENDANCE MODAL             */}
       {/* ========================================== */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={editingAttendance ? t('modalEditAttendance') : t('modalAddAttendance')}
-        maxWidth="720px"
+        maxWidth="740px"
       >
         <form onSubmit={handleFormSubmit} className="custom-form attendance-modal-form">
           {/* Date & Day Header Selector */}
@@ -894,7 +1244,7 @@ export const Attendance = () => {
       </Modal>
 
       {/* ========================================== */}
-      {/* DELETE CONFIRMATION MODAL */}
+      {/* DELETE CONFIRMATION MODAL                  */}
       {/* ========================================== */}
       <ConfirmModal
         isOpen={!!deleteTarget}
